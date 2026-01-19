@@ -1,0 +1,14 @@
+{
+    "name": "timeline-frontend",
+    "version": "1.0.0",
+    "description": "Timeline frontend with TypeScript and esbuild",
+    "scripts": {
+        "build": "esbuild src/ts/main.ts --bundle --outfile=public/js/app.js --minify --sourcemap",
+        "watch": "esbuild src/ts/main.ts --bundle --outfile=public/js/app.js --watch --sourcemap",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "esbuild": "^0.27.2",
+        "typescript": "^5.9.3"
+    }
+}

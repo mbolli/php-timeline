@@ -1,0 +1,8 @@
+<?php
+
+declare(strict_types=1);
+
+// Copy this file to local.php and adjust settings for your environment
+return [
+    'debug' => true,
+];
