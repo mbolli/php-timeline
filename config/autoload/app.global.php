@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use App\Infrastructure\Http\Listener\SseRequestListener;
+use Laminas\Stdlib\ArrayUtils\MergeReplaceKey;
 use Mezzio\Swoole\Event\HotCodeReloaderWorkerStartListener;
 use Mezzio\Swoole\Event\RequestEvent;
+use Mezzio\Swoole\Event\RequestHandlerRequestListener;
+use Mezzio\Swoole\Event\StaticResourceRequestListener;
 use Mezzio\Swoole\Event\WorkerStartEvent;
 
 return [
@@ -53,10 +56,14 @@ return [
                 ],
             ],
             'listeners' => [
-                // SSE listener runs before default handler for /updates endpoint
-                RequestEvent::class => [
+                // SSE listener MUST run before RequestHandlerRequestListener
+                // to intercept /updates and handle SSE streaming.
+                // Using MergeReplaceKey to override the default listener order.
+                RequestEvent::class => new MergeReplaceKey([
+                    StaticResourceRequestListener::class,
                     SseRequestListener::class,
-                ],
+                    RequestHandlerRequestListener::class,
+                ]),
                 // Register the hot code reloader listener with the WorkerStartEvent
                 WorkerStartEvent::class => [
                     HotCodeReloaderWorkerStartListener::class,

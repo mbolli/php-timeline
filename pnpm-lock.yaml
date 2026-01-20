@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@mbolli/datastar-attribute-on-keys':
+        specifier: ^1.1.0
+        version: 1.1.0
     devDependencies:
       esbuild:
         specifier: ^0.27.2
@@ -173,6 +177,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@mbolli/datastar-attribute-on-keys@1.1.0':
+    resolution: {integrity: sha512-Vl+c4lmQLms1T7CZ6VgxO4ncghnizi+w2y7JwoXD7BwxZsGxu4xGIEG0sg5g1e4p1M1iTXpmaifk8xVli8Vg2w==}
+
   esbuild@0.27.2:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
     engines: {node: '>=18'}
@@ -262,6 +269,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.2':
     optional: true
+
+  '@mbolli/datastar-attribute-on-keys@1.1.0': {}
 
   esbuild@0.27.2:
     optionalDependencies:

@@ -5,6 +5,7 @@
     --track-height: 60px;
     --month-width: 20px;
     --zoom-level: 1;
+    --pan-x: 0px;
     
     --color-bg: #1a1a2e;
     --color-surface: #16213e;
@@ -15,6 +16,10 @@
     --color-danger: #e74c3c;
     --color-success: #2ecc71;
     --color-border: #2a3f5f;
+    
+    /* Animation timing */
+    --transition-fast: 0.15s ease-out;
+    --transition-normal: 0.25s ease-out;
 }
 
 * {
@@ -134,6 +139,9 @@ body {
     background: 
         linear-gradient(90deg, var(--color-surface) var(--track-label-width), transparent var(--track-label-width)),
         var(--color-bg);
+    /* These are set dynamically via Datastar data-style binding */
+    --zoom-level: 1;
+    --pan-x: 0px;
 }
 
 .timeline-wrapper:active {
@@ -142,7 +150,8 @@ body {
 
 .timeline-container {
     min-height: 100%;
-    transform-origin: left top;
+    transform: translateX(var(--pan-x));
+    /* No transition - pan is always instant */
 }
 
 .timeline-content {
@@ -174,8 +183,9 @@ body {
 .year-marker {
     display: flex;
     flex-direction: column;
-    width: calc(12 * var(--month-width));
+    width: calc(12 * var(--month-width) * var(--zoom-level));
     border-left: 1px solid var(--color-border);
+    transition: width var(--transition-normal);
 }
 
 .year-label {
@@ -275,8 +285,14 @@ body {
     align-items: center;
     justify-content: space-between;
     overflow: hidden;
-    transition: transform 0.1s, box-shadow 0.1s;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* Zoom-aware positioning via custom properties set inline */
+    --item-left: 0;
+    --item-width: 100;
+    left: calc(var(--item-left) * var(--zoom-level) * 1px);
+    width: calc(var(--item-width) * var(--zoom-level) * 1px);
+    transition: left var(--transition-normal), width var(--transition-normal), 
+                transform 0.1s, box-shadow 0.1s;
 }
 
 .timeline-item:hover {
@@ -326,6 +342,9 @@ body {
     background: var(--color-danger);
     z-index: 40;
     pointer-events: none;
+    --now-position: 0;
+    left: calc(var(--track-label-width) + var(--now-position) * var(--zoom-level) * 1px);
+    transition: left var(--transition-normal);
 }
 
 .now-label {
@@ -361,6 +380,14 @@ body {
     justify-content: center;
     z-index: 1000;
     padding: 1rem;
+    /* Reset dialog defaults */
+    border: none;
+    margin: 0;
+    max-width: none;
+    max-height: none;
+    /* Center the dialog element itself */
+    align-self: center;
+    justify-self: center;
 }
 
 .modal.open,
@@ -382,6 +409,7 @@ body {
 .modal-content h2 {
     margin-bottom: 1.5rem;
     font-size: 1.25rem;
+    color: var(--color-text);
 }
 
 .modal-actions {

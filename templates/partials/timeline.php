@@ -66,7 +66,7 @@ $years = range($startYear, max($endYear, $currentYear + 1));
 
     <!-- Now Line -->
     <div class="now-line"
-         style="left: calc(var(--track-label-width) + <?php echo calculateTimelinePosition($currentYear, $currentMonth, $startYear); ?>px);"
+         style="--now-position: <?php echo calculateTimelinePosition($currentYear, $currentMonth, $startYear); ?>;"
          title="Today: <?php echo date('F Y'); ?>">
         <span class="now-label">Now</span>
     </div>

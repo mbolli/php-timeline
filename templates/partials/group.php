@@ -64,7 +64,7 @@ $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
                 ?>
             <div class="timeline-item <?php echo $item->isOngoing() ? 'ongoing' : ''; ?>"
                  data-item-id="<?php echo $item->id; ?>"
-                 style="left: <?php echo $pos['left']; ?>px; width: <?php echo $pos['width']; ?>px; top: <?php echo $top; ?>px; height: <?php echo $itemHeight; ?>px; background-color: <?php echo htmlspecialchars($itemColor); ?>;"
+                 style="--item-left: <?php echo $pos['left']; ?>; --item-width: <?php echo $pos['width']; ?>; top: <?php echo $top; ?>px; height: <?php echo $itemHeight; ?>px; background-color: <?php echo htmlspecialchars($itemColor); ?>;"
                  data-on:click="@get('/query/items/<?php echo $item->id; ?>')"
                  title="<?php echo htmlspecialchars($item->title); ?>&#10;<?php echo $item->startDate; ?> → <?php echo $item->endDate ?? 'ongoing'; ?>">
                 <span class="item-title"><?php echo htmlspecialchars($item->title); ?></span>

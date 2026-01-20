@@ -11,6 +11,7 @@ use App\Infrastructure\Template\TemplateRenderer;
 use Mezzio\Swoole\Event\RequestEvent;
 use starfederation\datastar\events\PatchElements;
 use starfederation\datastar\ServerSentEventGenerator;
+use Swoole\Coroutine\Channel;
 use Swoole\Timer;
 use Throwable;
 
@@ -19,6 +20,9 @@ use Throwable;
  *
  * This listener intercepts /updates requests and handles SSE streaming
  * directly using Swoole's response object, bypassing the standard PSR-7 flow.
+ *
+ * Uses a coroutine channel to block the request handler, keeping the
+ * connection open for Server-Sent Events streaming.
  */
 final class SseRequestListener
 {
@@ -48,19 +52,27 @@ final class SseRequestListener
         // Send initial timeline state
         $this->sendTimelineUpdate($response);
 
+        // Create a channel to keep the coroutine alive until connection closes
+        $closeChannel = new Channel(1);
+
         // Subscribe to timeline changes
         $subscriptionId = $this->eventBus->subscribe(
-            function (TimelineChangedEvent $e) use ($response): void {
+            function (TimelineChangedEvent $e) use ($response, $closeChannel): void {
+                // Check if connection is still alive
+                if (!$response->isWritable()) {
+                    $closeChannel->push(true);
+
+                    return;
+                }
                 $this->sendTimelineUpdate($response);
             }
         );
 
         // Set up keep-alive timer (every 30 seconds)
-        $timerId = Timer::tick(30000, function () use ($response, &$timerId, $subscriptionId): void {
+        $timerId = Timer::tick(30000, function () use ($response, $subscriptionId, $closeChannel): void {
             // Check if connection is still alive
             if (!$response->isWritable()) {
-                Timer::clear($timerId);
-                $this->eventBus->unsubscribe($subscriptionId);
+                $closeChannel->push(true);
 
                 return;
             }
@@ -69,20 +81,29 @@ final class SseRequestListener
             try {
                 $response->write(": keep-alive\n\n");
             } catch (Throwable) {
-                Timer::clear($timerId);
-                $this->eventBus->unsubscribe($subscriptionId);
+                $closeChannel->push(true);
             }
         });
 
         // Mark that we've handled this request (stops propagation to other listeners)
         $event->responseSent();
 
-        // Note: We don't call $response->end() - we keep the connection open for SSE
+        // Block the coroutine until the channel receives a close signal
+        // This keeps the connection open for SSE streaming
+        $closeChannel->pop();
+
+        // Cleanup when connection closes
+        Timer::clear($timerId);
+        $this->eventBus->unsubscribe($subscriptionId);
     }
 
     private function sendTimelineUpdate(\Swoole\Http\Response $response): void
     {
         try {
+            if (!$response->isWritable()) {
+                return;
+            }
+
             $timeline = ($this->getTimelineHandler)();
             $html = $this->renderer->render('partials/timeline', [
                 'groups' => $timeline['groups'],

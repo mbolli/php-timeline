@@ -10,6 +10,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Timeline</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "datastar": "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"
+        }
+    }
+    </script>
     <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"></script>
     <script type="module" src="/js/app.js"></script>
     <link rel="stylesheet" href="/css/timeline.css">
@@ -19,11 +26,22 @@
          data-signals='{
             "_zoom": 1,
             "_panX": 0,
+            "_isDragging": false,
+            "_lastMouseX": 0,
             "_showAddItem": false,
             "_showAddGroup": false,
-            "newItem": {"groupId": 1, "title": "", "startDate": "", "endDate": "", "color": "#3498db", "description": ""},
             "newGroup": {"name": "", "icon": "📁", "color": "#3498db"}
          }'
+         data-on-keys:left__noprevent="$_panX += 100"
+         data-on-keys:right__noprevent="$_panX -= 100"
+         data-on-keys:ctrl-0="$_zoom = 1; $_panX = 0"
+         data-on-keys:meta-0="$_zoom = 1; $_panX = 0"
+         data-on-keys:ctrl-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
+         data-on-keys:meta-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
+         data-on-keys:ctrl-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
+         data-on-keys:meta-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
+         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(event, $_lastMouseX); $_lastMouseX = event.clientX }"
+         data-on:mouseup__window="$_isDragging = false"
          data-indicator="_connected"
          data-init="@get('/updates')">
 
@@ -59,10 +77,16 @@
         </header>
 
         <!-- Timeline Container -->
-        <main class="timeline-wrapper">
+        <main class="timeline-wrapper"
+              data-on:wheel="const r = timeline.handleWheel(event, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
+              data-on:mousedown="if(!timeline.isTimelineItem(event)) { $_isDragging = true; $_lastMouseX = event.clientX }"
+              data-on:touchstart="if(event.touches.length === 1 && !timeline.isTimelineItem(event)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(event) }"
+              data-on:touchmove__prevent="if($_isDragging && event.touches.length === 1) { $_panX += timeline.getTouchX(event) - $_lastMouseX; $_lastMouseX = timeline.getTouchX(event) }"
+              data-on:touchend="$_isDragging = false"
+              data-style:--zoom-level="$_zoom"
+              data-style:--pan-x="$_panX + 'px'">
             <div id="timeline-container"
-                 class="timeline-container"
-                 data-style:transform="'translateX(' + $_panX + 'px)'">
+                 class="timeline-container">
                 <?php include __DIR__ . '/partials/timeline.php'; ?>
             </div>
         </main>
@@ -71,14 +95,14 @@
         <dialog class="modal" data-class:open="$_showAddItem">
             <div class="modal-content">
                 <h2>Add Timeline Item</h2>
-                <form data-on:submit__prevent="@post('/cmd/items'); $_showAddItem = false; $_newItem = {groupId: 1, title: '', startDate: '', endDate: '', color: '#3498db', description: ''}">
+                <form data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'}); $_showAddItem = false; this.reset()">
                     <div class="form-group">
                         <label>Title *</label>
-                        <input type="text" data-bind="$_newItem.title" required placeholder="e.g., iPhone 15 Pro">
+                        <input type="text" name="title" required placeholder="e.g., iPhone 15 Pro">
                     </div>
                     <div class="form-group">
                         <label>Group *</label>
-                        <select data-bind="$_newItem.groupId" required>
+                        <select name="groupId" required>
                             <?php foreach ($groups as $group) { ?>
                             <option value="<?php echo $group->id; ?>"><?php echo htmlspecialchars($group->icon . ' ' . $group->name); ?></option>
                             <?php } ?>
@@ -87,20 +111,20 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Start Date *</label>
-                            <input type="month" data-bind="$_newItem.startDate" required>
+                            <input type="month" name="startDate" required>
                         </div>
                         <div class="form-group">
                             <label>End Date</label>
-                            <input type="month" data-bind="$_newItem.endDate" placeholder="Leave empty for ongoing">
+                            <input type="month" name="endDate" placeholder="Leave empty for ongoing">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Color</label>
-                        <input type="color" data-bind="$_newItem.color" value="#3498db">
+                        <input type="color" name="color" value="#3498db">
                     </div>
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea data-bind="$_newItem.description" placeholder="Optional description..."></textarea>
+                        <textarea name="description" placeholder="Optional description..."></textarea>
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn" data-on:click="$_showAddItem = false">Cancel</button>
