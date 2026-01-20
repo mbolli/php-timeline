@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Infrastructure\Http\Handler\Command\GroupCommandHandler;
 use App\Infrastructure\Http\Handler\Command\ItemCommandHandler;
 use App\Infrastructure\Http\Handler\HomeHandler;
+use App\Infrastructure\Http\Handler\Query\GroupQueryHandler;
 use App\Infrastructure\Http\Handler\Query\ItemQueryHandler;
 use App\Infrastructure\Http\Handler\Query\TimelineQueryHandler;
 use App\Infrastructure\Http\Handler\UpdatesHandler;
@@ -22,10 +23,12 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     // Queries
     $app->get('/query/timeline', TimelineQueryHandler::class, 'query.timeline');
     $app->get('/query/items/{id:\d+}', ItemQueryHandler::class, 'query.items.get');
+    $app->get('/query/groups/{id:\d+}', GroupQueryHandler::class, 'query.groups.get');
 
     // Commands - Items
     $app->post('/cmd/items', ItemCommandHandler::class . ':create', 'cmd.items.create');
     $app->put('/cmd/items/{id:\d+}', ItemCommandHandler::class . ':update', 'cmd.items.update');
+    $app->patch('/cmd/items/{id:\d+}/resize', ItemCommandHandler::class . ':resize', 'cmd.items.resize');
     $app->delete('/cmd/items/{id:\d+}', ItemCommandHandler::class . ':delete', 'cmd.items.delete');
 
     // Commands - Groups

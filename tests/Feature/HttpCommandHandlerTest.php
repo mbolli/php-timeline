@@ -6,6 +6,7 @@ use App\Application\Command\CreateGroup\CreateGroupHandler;
 use App\Application\Command\CreateItem\CreateItemHandler;
 use App\Application\Command\DeleteGroup\DeleteGroupHandler;
 use App\Application\Command\DeleteItem\DeleteItemHandler;
+use App\Application\Command\ResizeItem\ResizeItemHandler;
 use App\Application\Command\UpdateGroup\UpdateGroupHandler;
 use App\Application\Command\UpdateItem\UpdateItemHandler;
 use App\Domain\Model\TimelineGroup;
@@ -33,6 +34,7 @@ describe('HTTP Command Handlers', function (): void {
         $this->createItemHandler = new CreateItemHandler($this->repository, $this->eventBus);
         $this->updateItemHandler = new UpdateItemHandler($this->repository, $this->eventBus);
         $this->deleteItemHandler = new DeleteItemHandler($this->repository, $this->eventBus);
+        $this->resizeItemHandler = new ResizeItemHandler($this->repository, $this->eventBus);
 
         // Create HTTP handlers
         $this->groupCommandHandler = new GroupCommandHandler(
@@ -46,6 +48,7 @@ describe('HTTP Command Handlers', function (): void {
             $this->createItemHandler,
             $this->updateItemHandler,
             $this->deleteItemHandler,
+            $this->resizeItemHandler,
         );
 
         // Create a default group for item tests
@@ -382,6 +385,85 @@ describe('HTTP Command Handlers', function (): void {
 
                 expect($response->getStatusCode())->toBe(204);
                 expect($this->repository->getItemById($this->item->id))->toBeNull();
+            });
+        });
+
+        describe('resize', function (): void {
+            beforeEach(function (): void {
+                $this->item = $this->repository->saveItem(new TimelineItem(
+                    id: null,
+                    groupId: $this->group->id,
+                    title: 'To Be Resized',
+                    startDate: '2023-01',
+                    endDate: '2023-06',
+                ));
+            });
+
+            it('resizes an item by changing dates via HTTP request', function (): void {
+                $request = (new ServerRequest())
+                    ->withMethod('PATCH')
+                    ->withUri(new Uri('/cmd/items/' . $this->item->id . '/resize'))
+                    ->withAttribute('id', (string) $this->item->id)
+                    ->withParsedBody([
+                        'startDate' => '2023-03',
+                        'endDate' => '2023-09',
+                    ]);
+
+                $response = $this->itemCommandHandler->resize($request);
+
+                expect($response->getStatusCode())->toBe(204);
+                $updated = $this->repository->getItemById($this->item->id);
+                expect($updated->startDate)->toBe('2023-03');
+                expect($updated->endDate)->toBe('2023-09');
+                // Other properties should remain unchanged
+                expect($updated->title)->toBe('To Be Resized');
+            });
+
+            it('can make an item ongoing by clearing end date', function (): void {
+                $request = (new ServerRequest())
+                    ->withMethod('PATCH')
+                    ->withUri(new Uri('/cmd/items/' . $this->item->id . '/resize'))
+                    ->withAttribute('id', (string) $this->item->id)
+                    ->withParsedBody([
+                        'startDate' => '2023-02',
+                        'endDate' => '',
+                    ]);
+
+                $response = $this->itemCommandHandler->resize($request);
+
+                expect($response->getStatusCode())->toBe(204);
+                $updated = $this->repository->getItemById($this->item->id);
+                expect($updated->startDate)->toBe('2023-02');
+                expect($updated->endDate)->toBeNull();
+            });
+
+            it('returns 404 for non-existent item', function (): void {
+                $request = (new ServerRequest())
+                    ->withMethod('PATCH')
+                    ->withUri(new Uri('/cmd/items/99999/resize'))
+                    ->withAttribute('id', '99999')
+                    ->withParsedBody([
+                        'startDate' => '2023-03',
+                        'endDate' => '2023-09',
+                    ]);
+
+                $response = $this->itemCommandHandler->resize($request);
+
+                expect($response->getStatusCode())->toBe(404);
+            });
+
+            it('returns 400 when startDate is missing', function (): void {
+                $request = (new ServerRequest())
+                    ->withMethod('PATCH')
+                    ->withUri(new Uri('/cmd/items/' . $this->item->id . '/resize'))
+                    ->withAttribute('id', (string) $this->item->id)
+                    ->withParsedBody([
+                        'endDate' => '2023-09',
+                    ]);
+
+                $response = $this->itemCommandHandler->resize($request);
+
+                expect($response->getStatusCode())->toBe(400);
             });
         });
     });

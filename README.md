@@ -12,6 +12,8 @@ A full-screen horizontal timeline application for visualizing life events, inspi
 
 - **Horizontal Timeline** — Zoomable month/year grid similar to Google Sheets
 - **Vertical Grouping** — Track-based layout like Adobe Premiere for categorizing events
+- **Resize Handles** — Drag item edges to adjust start/end dates (like video editing software)
+- **Drag & Drop Reordering** — Reorder groups via drag handle
 - **Real-time Multiplayer** — SSE-based updates via Event Bus pattern
 - **Declarative Frontend** — [Datastar](https://data-star.dev/) for reactive UI with minimal JavaScript
 - **CQRS Architecture** — Separated command and query handlers
@@ -21,9 +23,9 @@ A full-screen horizontal timeline application for visualizing life events, inspi
 
 | Layer | Technology |
 |-------|------------|
-| Backend | PHP 8.2+, Mezzio 3.19, Swoole |
+| Backend | PHP 8.2+, Mezzio 3.19, Swoole 5.0+ |
 | Database | SQLite (PDO) |
-| Frontend | TypeScript 5.7, esbuild, Datastar |
+| Frontend | TypeScript 5.7, esbuild, Datastar 1.0 |
 | Testing | Pest 4.0 |
 | Analysis | PHPStan, PHP-CS-Fixer |
 
@@ -137,12 +139,16 @@ src/App/Application/
 │   │   └── CreateItemHandler.php
 │   ├── UpdateItem/
 │   ├── DeleteItem/
+│   ├── ResizeItem/              # Resize item dates via drag
 │   ├── CreateGroup/
 │   ├── UpdateGroup/
-│   └── DeleteGroup/
+│   ├── DeleteGroup/
+│   └── ReorderGroups/           # Drag & drop group ordering
 └── Query/
-    └── GetTimeline/
-        └── GetTimelineHandler.php
+    ├── GetTimeline/
+    │   └── GetTimelineHandler.php
+    ├── GetItem/                 # Single item for edit modal
+    └── GetGroup/                # Single group for edit modal
 ```
 
 ### Multiplayer with Event Bus
@@ -173,28 +179,48 @@ The frontend uses [Datastar](https://data-star.dev/) for declarative reactivity:
 
 ```html
 <!-- Signals (reactive state) -->
-<div data-signals="{zoom: 1, pan: 0}">
+<div data-signals="{_zoom: 1, _panX: 0}">
 
 <!-- SSE connection for real-time updates -->
 <div data-init="@get('/updates')">
 
-<!-- Actions -->
-<button data-on:click="@post('/api/items')">Add Item</button>
+<!-- Actions with form data -->
+<form data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'})">
+
+<!-- Declarative event handlers -->
+<div data-on:dragstart="timeline.startDragGroup(evt, 1)"
+     data-on:drop="timeline.dropOnTrack(evt, 2)">
 ```
 
 ## API Endpoints
+
+### Pages & SSE
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/` | Home page with timeline |
 | GET | `/updates` | SSE endpoint for real-time updates |
-| GET | `/api/timeline` | Get all groups with items |
-| POST | `/api/items` | Create a new item |
-| PUT | `/api/items/{id}` | Update an item |
-| DELETE | `/api/items/{id}` | Delete an item |
-| POST | `/api/groups` | Create a new group |
-| PUT | `/api/groups/{id}` | Update a group |
-| DELETE | `/api/groups/{id}` | Delete a group |
+
+### Queries (read operations)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/query/timeline` | Get all groups with items (HTML partial) |
+| GET | `/query/items/{id}` | Get item for edit modal |
+| GET | `/query/groups/{id}` | Get group for edit modal |
+
+### Commands (write operations)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/cmd/items` | Create a new item |
+| PUT | `/cmd/items/{id}` | Update an item |
+| PATCH | `/cmd/items/{id}/resize` | Resize item dates (drag handles) |
+| DELETE | `/cmd/items/{id}` | Delete an item |
+| POST | `/cmd/groups` | Create a new group |
+| PUT | `/cmd/groups/{id}` | Update a group |
+| DELETE | `/cmd/groups/{id}` | Delete a group |
+| PUT | `/cmd/groups/reorder` | Reorder groups (drag & drop) |
 
 ## Sample Data Categories
 
@@ -215,11 +241,12 @@ The seeder includes example data for:
 
 | Control | Action |
 |---------|--------|
-| Mouse wheel | Zoom in/out (0.25x - 4x) |
-| Click + drag | Pan the timeline |
-| `+` / `-` keys | Zoom in/out |
-| `0` key | Reset zoom to 1x |
-| Arrow keys | Pan left/right |
+| Ctrl/Cmd + Mouse wheel | Zoom in/out (centered on cursor) |
+| Click + drag (on timeline) | Pan the timeline |
+| Drag item edge handles | Resize item start/end date |
+| Drag group handle (⠿) | Reorder groups |
+| Click item | Edit item |
+| Click group label | Edit group |
 
 ## License
 

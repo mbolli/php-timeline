@@ -27,10 +27,10 @@
             "_zoom": 1,
             "_panX": 0,
             "_isDragging": false,
+            "_isResizing": false,
             "_lastMouseX": 0,
             "_showAddItem": false,
-            "_showAddGroup": false,
-            "newGroup": {"name": "", "icon": "📁", "color": "#3498db"}
+            "_showAddGroup": false
          }'
          data-on-keys:left__noprevent="$_panX += 100"
          data-on-keys:right__noprevent="$_panX -= 100"
@@ -40,8 +40,10 @@
          data-on-keys:meta-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
          data-on-keys:ctrl-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
          data-on-keys:meta-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
-         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(event, $_lastMouseX); $_lastMouseX = event.clientX }"
-         data-on:mouseup__window="$_isDragging = false"
+         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(event, $_lastMouseX); $_lastMouseX = event.clientX } else if($_isResizing) { timeline.handleResizeMove(event) }"
+         data-on:mouseup__window="$_isDragging = false; if($_isResizing) { timeline.finishResize(); $_isResizing = false }"
+         data-on:keydown__window="event.key === 'Escape' && $_isResizing && timeline.cancelResize() && ($_isResizing = false)"
+         data-on:mousedown="timeline.startResize(event) && ($_isResizing = true)"
          data-indicator="_connected"
          data-init="@get('/updates')">
 
@@ -138,19 +140,19 @@
         <dialog class="modal" data-class:open="$_showAddGroup">
             <div class="modal-content">
                 <h2>Add Group</h2>
-                <form data-on:submit__prevent="@post('/cmd/groups'); $_showAddGroup = false; $_newGroup = {name: '', icon: '📁', color: '#3498db'}">
+                <form data-on:submit__prevent="@post('/cmd/groups', {contentType: 'form'}); $_showAddGroup = false; this.reset()">
                     <div class="form-group">
                         <label>Name *</label>
-                        <input type="text" data-bind:newGroup.name required placeholder="e.g., Gaming Consoles">
+                        <input type="text" name="name" required placeholder="e.g., Gaming Consoles">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Icon</label>
-                            <input type="text" data-bind:newGroup.icon placeholder="📁" maxlength="4">
+                            <input type="text" name="icon" value="📁" maxlength="4">
                         </div>
                         <div class="form-group">
                             <label>Color</label>
-                            <input type="color" data-bind:newGroup.color value="#3498db">
+                            <input type="color" name="color" value="#3498db">
                         </div>
                     </div>
                     <div class="modal-actions">

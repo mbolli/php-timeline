@@ -8,6 +8,8 @@ use App\Application\Command\CreateItem\CreateItemCommand;
 use App\Application\Command\CreateItem\CreateItemHandler;
 use App\Application\Command\DeleteItem\DeleteItemCommand;
 use App\Application\Command\DeleteItem\DeleteItemHandler;
+use App\Application\Command\ResizeItem\ResizeItemCommand;
+use App\Application\Command\ResizeItem\ResizeItemHandler;
 use App\Application\Command\UpdateItem\UpdateItemCommand;
 use App\Application\Command\UpdateItem\UpdateItemHandler;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -20,6 +22,7 @@ final class ItemCommandHandler {
         private readonly CreateItemHandler $createHandler,
         private readonly UpdateItemHandler $updateHandler,
         private readonly DeleteItemHandler $deleteHandler,
+        private readonly ResizeItemHandler $resizeHandler,
     ) {}
 
     public function create(ServerRequestInterface $request): ResponseInterface {
@@ -61,6 +64,24 @@ final class ItemCommandHandler {
         $result = ($this->deleteHandler)($command);
 
         if (!$result) {
+            return new JsonResponse(['error' => 'Item not found'], 404);
+        }
+
+        return new EmptyResponse(204);
+    }
+
+    public function resize(ServerRequestInterface $request): ResponseInterface {
+        $id = (int) $request->getAttribute('id');
+        $data = $this->getRequestData($request);
+
+        if (!isset($data['startDate'])) {
+            return new JsonResponse(['error' => 'Missing required startDate field'], 400);
+        }
+
+        $command = ResizeItemCommand::fromArray($id, $data);
+        $item = ($this->resizeHandler)($command);
+
+        if ($item === null) {
             return new JsonResponse(['error' => 'Item not found'], 404);
         }
 

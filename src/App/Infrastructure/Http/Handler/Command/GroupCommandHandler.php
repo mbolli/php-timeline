@@ -8,9 +8,10 @@ use App\Application\Command\CreateGroup\CreateGroupCommand;
 use App\Application\Command\CreateGroup\CreateGroupHandler;
 use App\Application\Command\DeleteGroup\DeleteGroupCommand;
 use App\Application\Command\DeleteGroup\DeleteGroupHandler;
+use App\Application\Command\ReorderGroups\ReorderGroupsCommand;
+use App\Application\Command\ReorderGroups\ReorderGroupsHandler;
 use App\Application\Command\UpdateGroup\UpdateGroupCommand;
 use App\Application\Command\UpdateGroup\UpdateGroupHandler;
-use App\Domain\Repository\TimelineRepositoryInterface;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -21,7 +22,7 @@ final class GroupCommandHandler {
         private readonly CreateGroupHandler $createHandler,
         private readonly UpdateGroupHandler $updateHandler,
         private readonly DeleteGroupHandler $deleteHandler,
-        private readonly TimelineRepositoryInterface $repository,
+        private readonly ReorderGroupsHandler $reorderHandler,
     ) {}
 
     public function create(ServerRequestInterface $request): ResponseInterface {
@@ -75,7 +76,8 @@ final class GroupCommandHandler {
             return new JsonResponse(['error' => 'Missing orderedIds array'], 400);
         }
 
-        $this->repository->reorderGroups($data['orderedIds']);
+        $command = new ReorderGroupsCommand(array_map('intval', $data['orderedIds']));
+        ($this->reorderHandler)($command);
 
         return new EmptyResponse(204);
     }
