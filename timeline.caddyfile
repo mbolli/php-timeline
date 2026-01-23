@@ -17,11 +17,8 @@ timeline.example.com {
 		header_up X-Forwarded-For {remote_host}
 		header_up X-Forwarded-Proto {scheme}
 		
-		# CRITICAL: Disable all buffering for SSE streaming
+		# Disable buffering for SSE streaming
 		flush_interval -1
-		buffer_requests off
-		buffer_responses off
-		max_buffer_size 0
 		
 		# Health check
 		health_uri /
@@ -51,20 +48,6 @@ timeline.example.com {
 		
 		# Remove server header
 		-Server
-	}
-
-	# Rate limiting for API endpoints (adjust as needed)
-	@api {
-		path /cmd/* /query/*
-	}
-	route @api {
-		rate_limit {
-			zone api_zone {
-				key {remote_host}
-				events 100
-				window 1m
-			}
-		}
 	}
 
 	# Access logs
