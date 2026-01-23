@@ -2,7 +2,29 @@
 
 declare(strict_types=1);
 
+use Mezzio\Swoole\Event\HotCodeReloaderWorkerStartListener;
+use Mezzio\Swoole\Event\WorkerStartEvent;
+
 // Copy this file to local.php and adjust settings for your environment
 return [
     'debug' => true,
+    
+    // Enable hot code reloading for development
+    'hot-code-reload' => [
+        'interval' => 500,
+        'paths' => [
+            getcwd(),
+        ],
+    ],
+    
+    'mezzio-swoole' => [
+        'swoole-http-server' => [
+            'listeners' => [
+                // Enable hot code reloader for development
+                WorkerStartEvent::class => [
+                    HotCodeReloaderWorkerStartListener::class,
+                ],
+            ],
+        ],
+    ],
 ];

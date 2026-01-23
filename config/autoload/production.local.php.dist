@@ -1,0 +1,69 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Production configuration - copy to production.local.php on your server
+ * 
+ * This file should NOT be committed to version control with real values.
+ */
+return [
+    'debug' => false,
+    
+    // Database - ensure proper permissions on the file
+    'database' => [
+        'dsn' => 'sqlite:' . realpath(__DIR__ . '/../../data') . '/timeline.db',
+    ],
+    
+    // Swoole production settings
+    'mezzio-swoole' => [
+        'swoole-http-server' => [
+            'host' => '127.0.0.1',  // Only listen on localhost (Caddy will proxy)
+            'port' => 3100,
+            'mode' => SWOOLE_PROCESS,
+            'options' => [
+                // Adjust worker_num based on your CPU cores
+                // Recommended: number of CPU cores for CPU-bound, 2x for I/O-bound
+                'worker_num' => 1,
+                
+                // Enable coroutines for async I/O
+                'enable_coroutine' => true,
+                
+                // Process management
+                'pid_file' => realpath(__DIR__ . '/../../data') . '/swoole.pid',
+                'max_request' => 10000,  // Restart worker after N requests (prevents memory leaks)
+                'max_request_grace' => 1000,  // Grace period for finishing requests
+                
+                // Logging
+                'log_level' => SWOOLE_LOG_WARNING,
+                'log_file' => '/var/log/timeline/swoole.log',
+                
+                // Buffer settings
+                'buffer_output_size' => 32 * 1024 * 1024,  // 32MB
+                'socket_buffer_size' => 128 * 1024 * 1024, // 128MB for SSE
+                
+                // Timeouts
+                'max_wait_time' => 5,
+                
+                // Security - disable HTTP/2 if not needed
+                'open_http2_protocol' => false,
+            ],
+            'static-files' => [
+                'enable' => true,  // Let Swoole serve static files (or set false if Caddy handles it)
+                'document-root' => realpath(__DIR__ . '/../../public'),
+                'type-map' => [
+                    'css' => 'text/css',
+                    'js' => 'application/javascript',
+                    'map' => 'application/json',
+                ],
+                'directives' => [
+                    '/\.(css|js|map)$/' => [
+                        'cache-control' => ['public', 'max-age=31536000', 'immutable'],
+                        'last-modified' => true,
+                        'etag' => true,
+                    ],
+                ],
+            ],
+        ],
+    ],
+];

@@ -20,20 +20,15 @@ return [
             'app' => [realpath(__DIR__ . '/../../templates')],
         ],
     ],
+    // Hot code reload - disabled in production (only enabled via local.php in dev)
     'hot-code-reload' => [
-        // Time in milliseconds between checks to changes in files.
         'interval' => 500,
-        'paths' => [
-            // List of paths, either files or directories, to scan for changes.
-            // By default this is empty; you will need to configure it.
-            // A common value:
-            getcwd(),
-        ],
+        'paths' => [],
     ],
     'mezzio-swoole' => [
         'swoole-http-server' => [
             'host' => '127.0.0.1',
-            'port' => 8080,
+            'port' => 3100,
             'options' => [
                 'worker_num'      => 1,          // The number of HTTP Server Workers
                 'enable_coroutine' => true,
@@ -64,10 +59,10 @@ return [
                     SseRequestListener::class,
                     RequestHandlerRequestListener::class,
                 ]),
-                // Register the hot code reloader listener with the WorkerStartEvent
-                WorkerStartEvent::class => [
-                    HotCodeReloaderWorkerStartListener::class,
-                ],
+                // Hot code reload disabled in production - enable via local.php for dev
+                // WorkerStartEvent::class => [
+                //     HotCodeReloaderWorkerStartListener::class,
+                // ],
             ],
         ],
     ],
