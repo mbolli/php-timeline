@@ -44,8 +44,8 @@ This project can serve as a **template for building high-performance PHP applica
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/timeline.git
-cd timeline
+git clone https://github.com/mbolli/php-timeline.git
+cd php-timeline
 
 # Install PHP dependencies
 composer install

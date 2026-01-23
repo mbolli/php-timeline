@@ -7,16 +7,16 @@ Wants=network-online.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/timeline
+WorkingDirectory=/opt/php-timeline
 
 # Environment
 Environment="XDEBUG_MODE=off"
 Environment="APP_ENV=production"
 
 # Start via composer script (uses laminas mezzio:swoole:start)
-ExecStart=/usr/bin/php /var/www/timeline/vendor/bin/laminas mezzio:swoole:start
-ExecStop=/usr/bin/php /var/www/timeline/vendor/bin/laminas mezzio:swoole:stop
-ExecReload=/usr/bin/php /var/www/timeline/vendor/bin/laminas mezzio:swoole:reload
+ExecStart=/usr/bin/php /opt/php-timeline/vendor/bin/laminas mezzio:swoole:start
+ExecStop=/usr/bin/php /opt/php-timeline/vendor/bin/laminas mezzio:swoole:stop
+ExecReload=/usr/bin/php /opt/php-timeline/vendor/bin/laminas mezzio:swoole:reload
 
 # Restart policy
 Restart=always
@@ -45,7 +45,7 @@ MemoryDenyWriteExecute=false
 RemoveIPC=true
 
 # Writable paths for SQLite database and PID file
-ReadWritePaths=/var/www/timeline/data
+ReadWritePaths=/opt/php-timeline/data
 
 # Process limits
 LimitNOFILE=65535
