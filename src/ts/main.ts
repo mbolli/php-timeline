@@ -244,7 +244,6 @@ const timeline = {
      * Check if we just finished resizing (to prevent click)
      */
     wasResizing(): boolean {
-        console.log('justFinishedResize:', justFinishedResize);
         return justFinishedResize;
     },
 
