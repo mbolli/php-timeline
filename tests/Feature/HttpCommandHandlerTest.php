@@ -6,6 +6,7 @@ use App\Application\Command\CreateGroup\CreateGroupHandler;
 use App\Application\Command\CreateItem\CreateItemHandler;
 use App\Application\Command\DeleteGroup\DeleteGroupHandler;
 use App\Application\Command\DeleteItem\DeleteItemHandler;
+use App\Application\Command\ReorderGroups\ReorderGroupsHandler;
 use App\Application\Command\ResizeItem\ResizeItemHandler;
 use App\Application\Command\UpdateGroup\UpdateGroupHandler;
 use App\Application\Command\UpdateItem\UpdateItemHandler;
@@ -31,6 +32,7 @@ describe('HTTP Command Handlers', function (): void {
         $this->createGroupHandler = new CreateGroupHandler($this->repository, $this->eventBus);
         $this->updateGroupHandler = new UpdateGroupHandler($this->repository, $this->eventBus);
         $this->deleteGroupHandler = new DeleteGroupHandler($this->repository, $this->eventBus);
+        $this->reorderGroupsHandler = new ReorderGroupsHandler($this->repository, $this->eventBus);
         $this->createItemHandler = new CreateItemHandler($this->repository, $this->eventBus);
         $this->updateItemHandler = new UpdateItemHandler($this->repository, $this->eventBus);
         $this->deleteItemHandler = new DeleteItemHandler($this->repository, $this->eventBus);
@@ -41,7 +43,7 @@ describe('HTTP Command Handlers', function (): void {
             $this->createGroupHandler,
             $this->updateGroupHandler,
             $this->deleteGroupHandler,
-            $this->repository,
+            $this->reorderGroupsHandler,
         );
 
         $this->itemCommandHandler = new ItemCommandHandler(
