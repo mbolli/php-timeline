@@ -13,11 +13,11 @@
     <script type="importmap">
     {
         "imports": {
-            "datastar": "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"
+            "datastar": "/js/datastar.js"
         }
     }
     </script>
-    <script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"></script>
+    <script type="module" src="/js/datastar.js"></script>
     <script type="module" src="/js/app.js"></script>
     <link rel="stylesheet" href="/css/timeline.css">
 </head>
