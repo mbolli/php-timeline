@@ -1,0 +1,80 @@
+# Life Timeline application configuration
+# Replace 'timeline.example.com' with your actual domain
+timeline.example.com {
+	# Compression - SSE streams benefit greatly from Brotli
+	encode {
+		br 6       # Brotli compression level 6
+		gzip 6     # Gzip fallback
+		minimum_length 256  # Compress small SSE payloads too
+	}
+
+	# Reverse proxy to Swoole server
+	reverse_proxy 127.0.0.1:3100 {
+		# SSE requires these headers
+		header_up Connection {http.request.header.Connection}
+		header_up Upgrade {http.request.header.Upgrade}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		
+		# CRITICAL: Disable all buffering for SSE streaming
+		flush_interval -1
+		buffer_requests off
+		buffer_responses off
+		max_buffer_size 0
+		
+		# Health check
+		health_uri /
+		health_interval 30s
+		health_timeout 5s
+	}
+
+	# Security headers
+	header {
+		# HTTPS enforcement
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		
+		# Prevent MIME sniffing
+		X-Content-Type-Options "nosniff"
+		
+		# Clickjacking protection
+		X-Frame-Options "SAMEORIGIN"
+		
+		# Referrer policy
+		Referrer-Policy "strict-origin-when-cross-origin"
+		
+		# Content Security Policy - adjust as needed for your CDN
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'"
+		
+		# Permissions Policy - disable unnecessary APIs
+		Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+		
+		# Remove server header
+		-Server
+	}
+
+	# Rate limiting for API endpoints (adjust as needed)
+	@api {
+		path /cmd/* /query/*
+	}
+	route @api {
+		rate_limit {
+			zone api_zone {
+				key {remote_host}
+				events 100
+				window 1m
+			}
+		}
+	}
+
+	# Access logs
+	log {
+		output file /var/log/caddy/timeline.log {
+			roll_size 100mb
+			roll_keep 5
+			roll_keep_for 720h
+		}
+		format json
+		level INFO
+	}
+}
