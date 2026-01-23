@@ -2,17 +2,21 @@
 
 A full-screen horizontal timeline application for visualizing life events, inspired by Google Sheets timeline view and Adobe Premiere's track-based layout.
 
-![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)
-![Swoole](https://img.shields.io/badge/Swoole-5.0+-007EC6?logo=swoole&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
+This project can serve as a **template for building high-performance PHP applications** using Swoole and Mezzio. It demonstrates how to leverage PSR-7/PSR-15 middleware, PSR-11 dependency injection, real-time SSE streaming, and CQRS+event bus patterns—all running on a persistent Swoole HTTP server for maximum throughput.
+
+[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Swoole](https://img.shields.io/badge/Swoole-5.0+-007EC6?logo=swoole&logoColor=white)](https://openswoole.com/)
+[![Datastar](https://img.shields.io/badge/Datastar-1.0-FF6B35?logo=rocket&logoColor=white)](https://data-star.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Made by zweiundeins.gmbh](https://img.shields.io/badge/Made%20with%20%E2%98%95%20by-zweiundeins.gmbh-blue)](https://zweiundeins.gmbh)
 
 ## Features
 
 - **Horizontal Timeline** — Zoomable month/year grid similar to Google Sheets
 - **Vertical Grouping** — Track-based layout like Adobe Premiere for categorizing events
-- **Resize Handles** — Drag item edges to adjust start/end dates (like video editing software)
+- **Resize Handles** — Drag item edges to adjust start/end dates
 - **Drag & Drop Reordering** — Reorder groups via drag handle
 - **Real-time Multiplayer** — SSE-based updates via Event Bus pattern
 - **Declarative Frontend** — [Datastar](https://data-star.dev/) for reactive UI with minimal JavaScript
@@ -52,6 +56,9 @@ npm install
 # Build frontend assets
 npm run build
 
+# Copy environment config (for development)
+cp config/autoload/local.php.dist config/autoload/local.php
+
 # Seed the database with sample data
 composer db:seed
 
@@ -59,7 +66,24 @@ composer db:seed
 composer serve
 ```
 
-Then open http://localhost:8080 in your browser.
+Then open http://localhost:3100 in your browser.
+
+### Configuration Files
+
+The `config/autoload/` directory uses Laminas config aggregation:
+
+| File | Purpose |
+|------|--------|
+| `app.global.php` | Base config for all environments (committed) |
+| `local.php.dist` | Development template → copy to `local.php` |
+| `production.local.php.dist` | Production template → copy to `production.local.php` |
+
+Files ending in `.local.php` are gitignored and override settings from `app.global.php`.
+
+For **production**, copy and adjust:
+```bash
+cp config/autoload/production.local.php.dist config/autoload/production.local.php
+```
 
 ## Development
 
@@ -251,3 +275,7 @@ The seeder includes example data for:
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+*Need help taming complexity in your PHP stack?* [zwei und eins gmbh](https://zweiundeins.gmbh) specializes in high-performance web applications.
