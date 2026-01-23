@@ -42,7 +42,7 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-danger"
-                        data-on:click="@delete('/cmd/items/<?php echo $item->id; ?>'); document.getElementById('edit-item-modal').remove()">
+                        data-on:click="@delete('/cmd/items/<?php echo $item->id; ?>'); setTimeout(() => document.getElementById('edit-item-modal')?.remove(), 100)">
                     Delete
                 </button>
                 <button type="button" class="btn" data-on:click="document.getElementById('edit-item-modal').remove()">Cancel</button>
