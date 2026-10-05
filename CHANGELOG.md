@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Touch screens scroll the timeline again in both directions; the custom touch handlers that blocked vertical scrolling are gone, since panning uses the native scroll position
+- No `timeline is not defined` error when Datastar starts before the app script has loaded
 
 ## [0.3.0] - 2026-10-05
 

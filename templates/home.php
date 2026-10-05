@@ -87,7 +87,7 @@ $isProduction = getenv('APP_ENV') === 'production';
               data-on:wheel="const r = timeline.handleWheel(evt, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
               data-on:mousedown="if(!timeline.isTimelineItem(evt) && !timeline.isControl(evt)) { $_isDragging = true; $_lastMouseX = evt.clientX }"
               data-on:scroll="const p = timeline.panFromScroll(el); if (p !== null) { $_panX = p }"
-              data-effect="const pan = $_panX; $_zoom; timeline.applyPan(el, pan)"
+              data-effect="const pan = $_panX; $_zoom; window.timeline?.applyPan(el, pan)"
               data-style:--zoom-level="$_zoom">
             <div id="timeline-container" class="timeline-container">
                 <?php include __DIR__ . '/partials/timeline.php'; ?>
