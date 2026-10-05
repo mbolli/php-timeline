@@ -28,6 +28,8 @@ interface ResizeState {
 }
 
 let resizeState: ResizeState | null = null;
+// When the app last scrolled the timeline itself; scroll events right after it are its own echo
+let lastPanApplied = 0;
 let justFinishedResize = false;
 
 const timeline = {
@@ -37,21 +39,89 @@ const timeline = {
      */
     handleWheel(e: WheelEvent, currentZoom: number, currentPanX: number): WheelResult | null {
         if (!e.ctrlKey && !e.metaKey) return null;
-        
+
         e.preventDefault();
-        
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newZoom = Math.max(0.1, Math.min(10, currentZoom * delta));
-        
-        // Zoom towards mouse position
-        const container = e.currentTarget as HTMLElement;
-        const rect = container.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const zoomRatio = newZoom / currentZoom;
-        
-        const newPanX = mouseX - (mouseX - currentPanX) * zoomRatio;
-        
-        return { zoom: newZoom, panX: newPanX };
+
+        const wrapper = e.currentTarget as HTMLElement;
+        const mouseX = e.clientX - wrapper.getBoundingClientRect().left;
+
+        return this.zoomAround(mouseX, e.deltaY > 0 ? 0.9 : 1.1, currentZoom, currentPanX);
+    },
+
+    /**
+     * Zoom by a factor around the middle of the visible timeline (toolbar buttons, keyboard)
+     */
+    zoomBy(factor: number, currentZoom: number, currentPanX: number): WheelResult {
+        const wrapper = document.querySelector('.timeline-wrapper') as HTMLElement | null;
+        const labelWidth = this.getLabelWidth();
+        const width = wrapper?.clientWidth ?? 800;
+
+        return this.zoomAround(labelWidth + (width - labelWidth) / 2, factor, currentZoom, currentPanX);
+    },
+
+    /**
+     * Keep the timeline point under x (pixels from the wrapper's left edge) in place while zooming
+     */
+    zoomAround(x: number, factor: number, currentZoom: number, currentPanX: number): WheelResult {
+        const newZoom = this.clampZoom(currentZoom * factor);
+        const labelWidth = this.getLabelWidth();
+        // panX is the negative scroll position, so this is the timeline position (unzoomed pixels) under x
+        const point = (x - currentPanX - labelWidth) / currentZoom;
+
+        return { zoom: newZoom, panX: Math.min(0, x - labelWidth - point * newZoom) };
+    },
+
+    /**
+     * Scroll the timeline to a pan value, again on the next frame in case a zoom has not widened it yet
+     */
+    applyPan(wrapper: HTMLElement, panX: number): void {
+        lastPanApplied = performance.now();
+        wrapper.scrollLeft = -panX;
+        requestAnimationFrame(() => {
+            lastPanApplied = performance.now();
+            wrapper.scrollLeft = -panX;
+        });
+    },
+
+    /**
+     * The pan value of a scroll the user made (trackpad, scrollbar, focus), or null for the app's own scrolling
+     */
+    panFromScroll(wrapper: HTMLElement): number | null {
+        return performance.now() - lastPanApplied < 150 ? null : -wrapper.scrollLeft;
+    },
+
+    /**
+     * Limit a pan value to the scrollable range (panX is the negative scroll position)
+     */
+    clampPan(panX: number): number {
+        const wrapper = document.querySelector('.timeline-wrapper') as HTMLElement | null;
+        const max = wrapper ? wrapper.scrollWidth - wrapper.clientWidth : 0;
+
+        return Math.min(0, Math.max(-max, panX));
+    },
+
+    /**
+     * Width of the group label column, which container queries may change
+     */
+    getLabelWidth(): number {
+        return (document.querySelector('.track-label-spacer') as HTMLElement | null)?.offsetWidth ?? 0;
+    },
+
+    /**
+     * Arrow keys pan only when nobody is typing and no dialog is open
+     */
+    canUseKeys(): boolean {
+        const active = document.activeElement as HTMLElement | null;
+        if (active?.closest('input, textarea, select, [contenteditable]')) return false;
+
+        return !document.querySelector('dialog[open]');
+    },
+
+    /**
+     * Check if the event started on a control that should not start panning
+     */
+    isControl(e: MouseEvent | TouchEvent): boolean {
+        return !!(e.target as HTMLElement).closest('button, a, input, select, textarea, .drag-handle');
     },
 
     /**

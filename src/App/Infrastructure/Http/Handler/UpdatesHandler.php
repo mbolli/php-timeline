@@ -73,7 +73,7 @@ final class UpdatesHandler implements RequestHandlerInterface {
 
     private function sendTimelineUpdate(\Swoole\Http\Response $response): void {
         $timeline = ($this->getTimelineHandler)();
-        $html = $this->renderer->render('partials/timeline', [
+        $html = $this->renderer->render('partials/updates', [
             'groups' => $timeline['groups'],
             'bounds' => $timeline['bounds'],
         ]);

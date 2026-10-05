@@ -54,8 +54,9 @@ $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
      data-on:dragleave="timeline.dragLeaveTrack(evt)"
      data-on:drop="timeline.dropOnTrack(evt, <?php echo $group->id; ?>)">
     <div class="track-label"
-         style="background: linear-gradient(<?php echo htmlspecialchars($group->color); ?>25, <?php echo htmlspecialchars($group->color); ?>25), var(--color-surface); border-left: 4px solid <?php echo htmlspecialchars($group->color); ?>; min-height: <?php echo $trackHeight; ?>px;">
+         style="--group-color: <?php echo htmlspecialchars($group->color); ?>; min-height: <?php echo $trackHeight; ?>px;">
         <span class="drag-handle"
+              title="Drag to reorder"
               draggable="true"
               data-on:mousedown__stop="evt.stopPropagation()"
               data-on:dragstart="timeline.startDragGroup(evt, <?php echo $group->id; ?>)"
@@ -66,11 +67,12 @@ $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
                 <circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/>
             </svg>
         </span>
-        <span class="track-info" data-on:click="@get('/query/groups/<?php echo $group->id; ?>')">
-            <span class="track-icon"><?php echo htmlspecialchars($group->icon); ?></span>
+        <button type="button" class="track-info" title="Edit <?php echo htmlspecialchars($group->name); ?>"
+                data-on:click="@get('/query/groups/<?php echo $group->id; ?>')">
+            <span class="track-icon" aria-hidden="true"><?php echo htmlspecialchars($group->icon); ?></span>
             <span class="track-name"><?php echo htmlspecialchars($group->name); ?></span>
-            <span class="track-count">(<?php echo count($group->items); ?>)</span>
-        </span>
+            <span class="track-count" aria-label="<?php echo count($group->items); ?> items"><?php echo count($group->items); ?></span>
+        </button>
     </div>
     <div class="track-items" style="min-height: <?php echo $trackHeight; ?>px;">
         <?php if (empty($group->items)) { ?>
@@ -86,13 +88,15 @@ $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
                  data-group-id="<?php echo $item->groupId; ?>"
                  data-start-date="<?php echo $item->startDate; ?>"
                  data-end-date="<?php echo $item->endDate ?? ''; ?>"
-                 style="--item-left: <?php echo $pos['left']; ?>; --item-width: <?php echo $pos['width']; ?>; top: <?php echo $top; ?>px; height: <?php echo $itemHeight; ?>px; background-color: <?php echo htmlspecialchars($itemColor); ?>;"
+                 style="--item-left: <?php echo $pos['left']; ?>; --item-width: <?php echo $pos['width']; ?>; --item-color: <?php echo htmlspecialchars($itemColor); ?>; top: <?php echo $top; ?>px; height: <?php echo $itemHeight; ?>px;"
+                 role="button" tabindex="0"
                  data-on:click="!timeline.wasResizing() && @get('/query/items/<?php echo $item->id; ?>')"
+                 data-on:keydown="(evt.key === 'Enter' || evt.key === ' ') && (evt.preventDefault(), @get('/query/items/<?php echo $item->id; ?>'))"
                  title="<?php echo htmlspecialchars($item->title); ?>&#10;<?php echo $item->startDate; ?> → <?php echo $item->endDate ?? 'ongoing'; ?>">
                 <div class="resize-handle resize-handle-start" data-handle="start" data-on:click__prevent__stop="evt.stopPropagation()"></div>
                 <span class="item-title"><?php echo htmlspecialchars($item->title); ?></span>
                 <?php if ($item->isOngoing()) { ?>
-                <span class="ongoing-indicator">→</span>
+                <span class="ongoing-indicator" aria-label="ongoing">→</span>
                 <?php } ?>
                 <div class="resize-handle resize-handle-end" data-handle="end" data-on:click__prevent__stop="evt.stopPropagation()"></div>
             </div>

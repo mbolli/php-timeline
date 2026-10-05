@@ -3,13 +3,16 @@
  * @var array $groups
  * @var array $bounds
  */
+$isProduction = getenv('APP_ENV') === 'production';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>Life Timeline</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E">
     <script type="importmap">
     {
         "imports": {
@@ -32,142 +35,141 @@
             "_showAddItem": false,
             "_showAddGroup": false
          }'
-         data-on-keys:left__noprevent="$_panX += 100"
-         data-on-keys:right__noprevent="$_panX -= 100"
+         data-on-keys:left__noprevent="timeline.canUseKeys() && ($_panX = timeline.clampPan($_panX + 100))"
+         data-on-keys:right__noprevent="timeline.canUseKeys() && ($_panX = timeline.clampPan($_panX - 100))"
          data-on-keys:ctrl-0="$_zoom = 1; $_panX = 0"
          data-on-keys:meta-0="$_zoom = 1; $_panX = 0"
-         data-on-keys:ctrl-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
-         data-on-keys:meta-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
-         data-on-keys:ctrl-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
-         data-on-keys:meta-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
-         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(evt, $_lastMouseX); $_lastMouseX = evt.clientX } else if($_isResizing) { timeline.handleResizeMove(evt) }"
+         data-on-keys:ctrl-equal="const r = timeline.zoomBy(1.2, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX"
+         data-on-keys:meta-equal="const r = timeline.zoomBy(1.2, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX"
+         data-on-keys:ctrl-minus="const r = timeline.zoomBy(1 / 1.2, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX"
+         data-on-keys:meta-minus="const r = timeline.zoomBy(1 / 1.2, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX"
+         data-on:mousemove__window="if($_isDragging) { $_panX = timeline.clampPan($_panX + timeline.getDragDelta(evt, $_lastMouseX)); $_lastMouseX = evt.clientX } else if($_isResizing) { timeline.handleResizeMove(evt) }"
          data-on:mouseup__window="$_isDragging = false; if($_isResizing) { timeline.finishResize(); $_isResizing = false }"
          data-on:keydown__window="evt.key === 'Escape' && $_isResizing && timeline.cancelResize() && ($_isResizing = false)"
          data-on:mousedown="timeline.startResize(evt) && ($_isResizing = true)"
          data-indicator="_connected"
          data-init="@get('/updates')">
 
-        <!-- Header Toolbar -->
         <header class="toolbar">
-            <div class="toolbar-left">
-                <h1>📅 Life Timeline</h1>
+            <h1 class="toolbar-title"><span aria-hidden="true">📅</span> Life Timeline</h1>
+
+            <div class="toolbar-zoom" role="group" aria-label="Zoom">
+                <button type="button" class="btn btn-icon" aria-label="Zoom out" title="Zoom out (Ctrl −)"
+                        data-on:click="const r = timeline.zoomBy(1 / 1.5, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-4-4"/></svg>
+                </button>
+                <output class="zoom-level" aria-live="polite" data-text="Math.round($_zoom * 100) + '%'">100%</output>
+                <button type="button" class="btn btn-icon" aria-label="Zoom in" title="Zoom in (Ctrl +)"
+                        data-on:click="const r = timeline.zoomBy(1.5, $_zoom, $_panX); $_zoom = r.zoom; $_panX = r.panX">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M11 8v6M20 20l-4-4"/></svg>
+                </button>
+                <button type="button" class="btn btn-icon" aria-label="Reset view" title="Reset view (Ctrl 0)"
+                        data-on:click="$_zoom = 1; $_panX = 0">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v5h5"/></svg>
+                </button>
             </div>
-            <div class="toolbar-center">
-                <button class="btn btn-icon" data-on:click="$_zoom = Math.max($_zoom / 1.5, 0.1)" title="Zoom Out">
-                    🔍−
+
+            <div class="toolbar-actions">
+                <button type="button" class="btn btn-primary" data-on:click="$_showAddGroup = true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Group
                 </button>
-                <span class="zoom-level" data-text="Math.round($_zoom * 100) + '%'">100%</span>
-                <button class="btn btn-icon" data-on:click="$_zoom = Math.min($_zoom * 1.5, 10)" title="Zoom In">
-                    🔍+
+                <button type="button" class="btn btn-primary" data-on:click="$_showAddItem = true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Item
                 </button>
-                <button class="btn btn-icon" data-on:click="$_zoom = 1; $_panX = 0" title="Reset View">
-                    ⟲
-                </button>
-            </div>
-            <div class="toolbar-right">
-                <button class="btn btn-primary" data-on:click="$_showAddGroup = true">
-                    + Group
-                </button>
-                <button class="btn btn-primary" data-on:click="$_showAddItem = true">
-                    + Item
-                </button>
-                <span class="connection-indicator">
-                    <span data-show="$_connected">🟢</span>
-                    <span data-show="!$_connected">🔴</span>
+                <span class="connection" role="status" data-class:is-live="$_connected">
+                    <span data-show="$_connected">Live</span>
+                    <span data-show="!$_connected">Offline</span>
                 </span>
             </div>
         </header>
 
-        <!-- Timeline Container -->
         <main class="timeline-wrapper"
               data-on:wheel="const r = timeline.handleWheel(evt, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
-              data-on:mousedown="if(!timeline.isTimelineItem(evt)) { $_isDragging = true; $_lastMouseX = evt.clientX }"
-              data-on:touchstart="if(evt.touches.length === 1 && !timeline.isTimelineItem(evt)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(evt) }"
-              data-on:touchmove__prevent="if($_isDragging && evt.touches.length === 1) { $_panX += timeline.getTouchX(evt) - $_lastMouseX; $_lastMouseX = timeline.getTouchX(evt) }"
+              data-on:mousedown="if(!timeline.isTimelineItem(evt) && !timeline.isControl(evt)) { $_isDragging = true; $_lastMouseX = evt.clientX }"
+              data-on:touchstart="if(evt.touches.length === 1 && !timeline.isTimelineItem(evt) && !timeline.isControl(evt)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(evt) }"
+              data-on:touchmove__prevent="if($_isDragging && evt.touches.length === 1) { $_panX = timeline.clampPan($_panX + timeline.getTouchX(evt) - $_lastMouseX); $_lastMouseX = timeline.getTouchX(evt) }"
               data-on:touchend="$_isDragging = false"
-              data-style:--zoom-level="$_zoom"
-              data-style:--pan-x="$_panX + 'px'">
-            <div id="timeline-container"
-                 class="timeline-container">
+              data-on:scroll="const p = timeline.panFromScroll(el); if (p !== null) { $_panX = p }"
+              data-effect="const pan = $_panX; $_zoom; timeline.applyPan(el, pan)"
+              data-style:--zoom-level="$_zoom">
+            <div id="timeline-container" class="timeline-container">
                 <?php include __DIR__ . '/partials/timeline.php'; ?>
             </div>
         </main>
 
-        <!-- Add Item Modal -->
-        <dialog class="modal" data-class:open="$_showAddItem">
-            <div class="modal-content">
-                <h2>Add Timeline Item</h2>
-                <form data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'}); $_showAddItem = false; el.reset()">
-                    <div class="form-group">
-                        <label>Title *</label>
-                        <input type="text" name="title" required placeholder="e.g., iPhone 15 Pro">
+        <dialog class="modal" aria-labelledby="add-item-title"
+                data-effect="$_showAddItem ? (el.open || el.showModal()) : (el.open && el.close())"
+                data-on:close="$_showAddItem = false"
+                data-on:click="evt.target === el && el.close()">
+            <form class="modal-content" data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'}); el.reset(); $_showAddItem = false">
+                <h2 id="add-item-title">Add timeline item</h2>
+                <div class="field">
+                    <label for="add-item-name">Title</label>
+                    <input id="add-item-name" type="text" name="title" required maxlength="200" pattern=".*\S.*" autofocus placeholder="e.g. iPhone 15 Pro">
+                </div>
+                <div class="field">
+                    <label for="add-item-group">Group</label>
+                    <?php include __DIR__ . '/partials/group-select.php'; ?>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="add-item-start">Start</label>
+                        <input id="add-item-start" type="month" name="startDate" required
+                               data-on:input="el.form.elements.endDate.min = el.value">
                     </div>
-                    <div class="form-group">
-                        <label>Group *</label>
-                        <select name="groupId" required>
-                            <?php foreach ($groups as $group) { ?>
-                            <option value="<?php echo $group->id; ?>"><?php echo htmlspecialchars($group->icon . ' ' . $group->name); ?></option>
-                            <?php } ?>
-                        </select>
+                    <div class="field">
+                        <label for="add-item-end">End <small>(empty if ongoing)</small></label>
+                        <input id="add-item-end" type="month" name="endDate">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Start Date *</label>
-                            <input type="month" name="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label>End Date</label>
-                            <input type="month" name="endDate" placeholder="Leave empty for ongoing">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Color</label>
-                        <input type="color" name="color" value="#3498db">
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea name="description" placeholder="Optional description..."></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn" data-on:click="$_showAddItem = false">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Item</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="field">
+                    <label for="add-item-color">Color</label>
+                    <input id="add-item-color" type="color" name="color" value="#3498db">
+                </div>
+                <div class="field">
+                    <label for="add-item-description">Description</label>
+                    <textarea id="add-item-description" name="description" maxlength="2000" placeholder="Optional"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" data-on:click="el.closest('dialog').close()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add item</button>
+                </div>
+            </form>
         </dialog>
 
-        <!-- Add Group Modal -->
-        <dialog class="modal" data-class:open="$_showAddGroup">
-            <div class="modal-content">
-                <h2>Add Group</h2>
-                <form data-on:submit__prevent="@post('/cmd/groups', {contentType: 'form'}); $_showAddGroup = false; el.reset()">
-                    <div class="form-group">
-                        <label>Name *</label>
-                        <input type="text" name="name" required placeholder="e.g., Gaming Consoles">
+        <dialog class="modal" aria-labelledby="add-group-title"
+                data-effect="$_showAddGroup ? (el.open || el.showModal()) : (el.open && el.close())"
+                data-on:close="$_showAddGroup = false"
+                data-on:click="evt.target === el && el.close()">
+            <form class="modal-content" data-on:submit__prevent="@post('/cmd/groups', {contentType: 'form'}); el.reset(); $_showAddGroup = false">
+                <h2 id="add-group-title">Add group</h2>
+                <div class="field">
+                    <label for="add-group-name">Name</label>
+                    <input id="add-group-name" type="text" name="name" required maxlength="100" pattern=".*\S.*" autofocus placeholder="e.g. Gaming consoles">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="add-group-icon">Icon</label>
+                        <input id="add-group-icon" type="text" name="icon" value="📁" maxlength="16">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Icon</label>
-                            <input type="text" name="icon" value="📁" maxlength="4">
-                        </div>
-                        <div class="form-group">
-                            <label>Color</label>
-                            <input type="color" name="color" value="#3498db">
-                        </div>
+                    <div class="field">
+                        <label for="add-group-color">Color</label>
+                        <input id="add-group-color" type="color" name="color" value="#3498db">
                     </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn" data-on:click="$_showAddGroup = false">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Group</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" data-on:click="el.closest('dialog').close()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add group</button>
+                </div>
+            </form>
         </dialog>
 
-        <!-- Debug Panel (hidden by default) -->
+        <?php if (!$isProduction) { ?>
         <details class="debug-panel">
-            <summary>Debug Signals</summary>
+            <summary>Debug signals</summary>
             <pre data-json-signals></pre>
         </details>
+        <?php } ?>
     </div>
 </body>
 </html>

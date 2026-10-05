@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-05
+
+### Fixed
+
+- Deleting a group deletes its items: SQLite foreign keys are now on, and items left over from earlier deletes are removed at startup
+- The server validates input (title, `YYYY-MM` dates with the end not before the start, `#rrggbb` colors, existing group) and answers 422 with the reason per field; colors can no longer inject CSS
+- Deleting an item or a group asks for confirmation, and for a group says how many items go with it
+- Dialogs are native `<dialog>` elements: Escape and a click outside close them, focus moves into them, and every label is linked to its field
+- Arrow keys no longer pan the timeline while typing or while a dialog is open
+- New groups show up in the add-item form without a reload
+- Zooming keeps the centre (buttons, keyboard) or the point under the mouse (Ctrl+wheel) in place
+- The group labels stay in place while panning; panning uses the native scroll position, so trackpads and scrollbars work too
+- Long group names are shortened instead of overflowing into the timeline
+- The debug panel only shows outside production; the page has a favicon; the connection status says "Live" or "Offline"
+
+### Changed
+
+- Stylesheet rewritten with cascade layers, nesting, container queries and `color-mix()`; a light theme follows the system setting
+- Toolbar buttons use SVG icons with labels; items and group names can be opened with the keyboard
+
 ## [0.2.0] - 2026-10-05
 
 ### Changed

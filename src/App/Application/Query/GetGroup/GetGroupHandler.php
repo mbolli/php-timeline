@@ -12,7 +12,10 @@ final class GetGroupHandler {
         private readonly TimelineRepositoryInterface $repository,
     ) {}
 
+    /**
+     * The group with its items, so the edit dialog can say how many items a delete removes.
+     */
     public function __invoke(int $id): ?TimelineGroup {
-        return $this->repository->getGroupById($id);
+        return $this->repository->getGroupById($id)?->withItems($this->repository->getItemsByGroupId($id));
     }
 }
