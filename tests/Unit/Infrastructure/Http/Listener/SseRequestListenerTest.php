@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Application\Query\GetTimeline\GetTimelineHandler;
-use App\Infrastructure\EventBus\EventBusInterface;
 use App\Infrastructure\EventBus\SwooleEventBus;
 use App\Infrastructure\Http\Listener\SseRequestListener;
 use App\Infrastructure\Persistence\SqliteTimelineRepository;
 use App\Infrastructure\Template\TemplateRenderer;
 use Mezzio\Swoole\Event\RequestEvent;
+use Swoole\Coroutine;
 use Swoole\Http\Request as SwooleRequest;
 use Swoole\Http\Response as SwooleResponse;
 
@@ -18,7 +18,7 @@ use Swoole\Http\Response as SwooleResponse;
 describe('SseRequestListener', function (): void {
     beforeEach(function (): void {
         // Skip if not in Swoole coroutine context
-        if (!class_exists(\Swoole\Coroutine::class) || \Swoole\Coroutine::getCid() < 0) {
+        if (!class_exists(Coroutine::class) || Coroutine::getCid() < 0) {
             $this->markTestSkipped('Requires Swoole coroutine runtime');
         }
 

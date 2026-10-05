@@ -1,6 +1,9 @@
 <?php
+
+use App\Domain\Model\TimelineItem;
+
 /**
- * @var \App\Domain\Model\TimelineItem $item
+ * @var TimelineItem $item
  * @var array $groups
  */
 ?>

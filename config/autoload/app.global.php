@@ -30,7 +30,7 @@ return [
             'host' => '127.0.0.1',
             'port' => 3100,
             'options' => [
-                'worker_num'      => 1,          // The number of HTTP Server Workers
+                'worker_num' => 1,          // The number of HTTP Server Workers
                 'enable_coroutine' => true,
                 'pid_file' => realpath(__DIR__ . '/../../data') . '/swoole.pid',
             ],

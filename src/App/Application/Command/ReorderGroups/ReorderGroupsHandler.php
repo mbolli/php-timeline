@@ -14,9 +14,6 @@ final class ReorderGroupsHandler {
         private readonly EventBusInterface $eventBus,
     ) {}
 
-    /**
-     * @return void
-     */
     public function __invoke(ReorderGroupsCommand $command): void {
         $this->repository->reorderGroups($command->orderedIds);
 

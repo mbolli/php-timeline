@@ -26,13 +26,16 @@ describe('SseRequestListenerFactory', function (): void {
         $this->container = Mockery::mock(ContainerInterface::class);
         $this->container->shouldReceive('get')
             ->with(EventBusInterface::class)
-            ->andReturn($eventBus);
+            ->andReturn($eventBus)
+        ;
         $this->container->shouldReceive('get')
             ->with(GetTimelineHandler::class)
-            ->andReturn($getTimelineHandler);
+            ->andReturn($getTimelineHandler)
+        ;
         $this->container->shouldReceive('get')
             ->with(TemplateRenderer::class)
-            ->andReturn($renderer);
+            ->andReturn($renderer)
+        ;
     });
 
     afterEach(function (): void {

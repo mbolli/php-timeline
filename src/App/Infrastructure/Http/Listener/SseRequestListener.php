@@ -12,8 +12,8 @@ use Mezzio\Swoole\Event\RequestEvent;
 use starfederation\datastar\events\PatchElements;
 use starfederation\datastar\ServerSentEventGenerator;
 use Swoole\Coroutine\Channel;
+use Swoole\Http\Response;
 use Swoole\Timer;
-use Throwable;
 
 /**
  * SSE Request Listener for mezzio-swoole.
@@ -24,16 +24,14 @@ use Throwable;
  * Uses a coroutine channel to block the request handler, keeping the
  * connection open for Server-Sent Events streaming.
  */
-final class SseRequestListener
-{
+final class SseRequestListener {
     public function __construct(
         private readonly EventBusInterface $eventBus,
         private readonly GetTimelineHandler $getTimelineHandler,
         private readonly TemplateRenderer $renderer,
     ) {}
 
-    public function __invoke(RequestEvent $event): void
-    {
+    public function __invoke(RequestEvent $event): void {
         $request = $event->getRequest();
         $uri = $request->server['request_uri'] ?? '/';
 
@@ -69,7 +67,7 @@ final class SseRequestListener
         );
 
         // Set up keep-alive timer (every 30 seconds)
-        $timerId = Timer::tick(30000, function () use ($response, $subscriptionId, $closeChannel): void {
+        $timerId = Timer::tick(30000, function () use ($response, $closeChannel): void {
             // Check if connection is still alive
             if (!$response->isWritable()) {
                 $closeChannel->push(true);
@@ -80,7 +78,7 @@ final class SseRequestListener
             // Send comment as keep-alive
             try {
                 $response->write(": keep-alive\n\n");
-            } catch (Throwable) {
+            } catch (\Throwable) {
                 $closeChannel->push(true);
             }
         });
@@ -97,8 +95,7 @@ final class SseRequestListener
         $this->eventBus->unsubscribe($subscriptionId);
     }
 
-    private function sendTimelineUpdate(\Swoole\Http\Response $response): void
-    {
+    private function sendTimelineUpdate(Response $response): void {
         try {
             if (!$response->isWritable()) {
                 return;
@@ -115,7 +112,7 @@ final class SseRequestListener
             $output = $event->getOutput();
 
             $response->write($output);
-        } catch (Throwable) {
+        } catch (\Throwable) {
             // Connection may have closed
         }
     }

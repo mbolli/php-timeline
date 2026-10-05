@@ -33,6 +33,9 @@ use App\Infrastructure\Persistence\SqliteTimelineRepository;
 use App\Infrastructure\Template\TemplateRenderer;
 use PDO;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 final class ConfigProvider {
     /**
@@ -183,27 +186,31 @@ final class ConfigProvider {
                 ),
 
                 // Route method handlers for Items
-                ItemCommandHandler::class . ':create' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                ItemCommandHandler::class . ':create' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly ItemCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->create($request);
                     }
                 },
-                ItemCommandHandler::class . ':update' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                ItemCommandHandler::class . ':update' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly ItemCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->update($request);
                     }
                 },
-                ItemCommandHandler::class . ':delete' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                ItemCommandHandler::class . ':delete' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly ItemCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->delete($request);
                     }
                 },
-                ItemCommandHandler::class . ':resize' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                ItemCommandHandler::class . ':resize' => fn (ContainerInterface $container) => new class($container->get(ItemCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly ItemCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->resize($request);
                     }
                 },
@@ -216,27 +223,31 @@ final class ConfigProvider {
                 ),
 
                 // Route method handlers for Groups
-                GroupCommandHandler::class . ':create' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                GroupCommandHandler::class . ':create' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly GroupCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->create($request);
                     }
                 },
-                GroupCommandHandler::class . ':update' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                GroupCommandHandler::class . ':update' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly GroupCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->update($request);
                     }
                 },
-                GroupCommandHandler::class . ':delete' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                GroupCommandHandler::class . ':delete' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly GroupCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->delete($request);
                     }
                 },
-                GroupCommandHandler::class . ':reorder' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements \Psr\Http\Server\RequestHandlerInterface {
+                GroupCommandHandler::class . ':reorder' => fn (ContainerInterface $container) => new class($container->get(GroupCommandHandler::class)) implements RequestHandlerInterface {
                     public function __construct(private readonly GroupCommandHandler $handler) {}
-                    public function handle(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface {
+
+                    public function handle(ServerRequestInterface $request): ResponseInterface {
                         return $this->handler->reorder($request);
                     }
                 },

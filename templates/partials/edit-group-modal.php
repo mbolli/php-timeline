@@ -1,6 +1,9 @@
 <?php
+
+use App\Domain\Model\TimelineGroup;
+
 /**
- * @var \App\Domain\Model\TimelineGroup $group
+ * @var TimelineGroup $group
  */
 ?>
 <dialog id="edit-group-modal" class="modal open">

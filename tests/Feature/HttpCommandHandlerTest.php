@@ -67,7 +67,8 @@ describe('HTTP Command Handlers', function (): void {
                         'name' => 'Mobile Phones',
                         'icon' => '📱',
                         'color' => '#e74c3c',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->create($request);
 
@@ -90,7 +91,8 @@ describe('HTTP Command Handlers', function (): void {
                             'icon' => '🎮',
                             'color' => '#9b59b6',
                         ],
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->create($request);
 
@@ -106,7 +108,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withUri(new Uri('/cmd/groups'))
                     ->withParsedBody([
                         'icon' => '📱',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->create($request);
 
@@ -124,7 +127,8 @@ describe('HTTP Command Handlers', function (): void {
                         'name' => 'Updated Group Name',
                         'icon' => '🚀',
                         'color' => '#2ecc71',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->update($request);
 
@@ -143,7 +147,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withAttribute('id', '99999')
                     ->withParsedBody([
                         'name' => 'Non-existent',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->update($request);
 
@@ -156,7 +161,8 @@ describe('HTTP Command Handlers', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('DELETE')
                     ->withUri(new Uri('/cmd/groups/' . $this->group->id))
-                    ->withAttribute('id', (string) $this->group->id);
+                    ->withAttribute('id', (string) $this->group->id)
+                ;
 
                 $response = $this->groupCommandHandler->delete($request);
 
@@ -175,7 +181,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withUri(new Uri('/cmd/groups/reorder'))
                     ->withParsedBody([
                         'orderedIds' => [$group3->id, $group2->id, $this->group->id],
-                    ]);
+                    ])
+                ;
 
                 $response = $this->groupCommandHandler->reorder($request);
 
@@ -191,7 +198,8 @@ describe('HTTP Command Handlers', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('PUT')
                     ->withUri(new Uri('/cmd/groups/reorder'))
-                    ->withParsedBody([]);
+                    ->withParsedBody([])
+                ;
 
                 $response = $this->groupCommandHandler->reorder($request);
 
@@ -213,7 +221,8 @@ describe('HTTP Command Handlers', function (): void {
                         'endDate' => '2024-09',
                         'color' => '#3498db',
                         'description' => 'My daily driver',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->create($request);
 
@@ -237,7 +246,8 @@ describe('HTTP Command Handlers', function (): void {
                             'title' => 'MacBook Pro',
                             'startDate' => '2022-01',
                         ],
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->create($request);
 
@@ -255,7 +265,8 @@ describe('HTTP Command Handlers', function (): void {
                         'groupId' => $this->group->id,
                         'title' => 'Current Job',
                         'startDate' => '2024-01',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->create($request);
 
@@ -271,7 +282,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withUri(new Uri('/cmd/items'))
                     ->withParsedBody([
                         'title' => 'Missing group and date',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->create($request);
 
@@ -302,7 +314,8 @@ describe('HTTP Command Handlers', function (): void {
                         'endDate' => '2024-06',
                         'color' => '#e74c3c',
                         'description' => 'Updated description',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->update($request);
 
@@ -326,7 +339,8 @@ describe('HTTP Command Handlers', function (): void {
                         'title' => 'Now Ongoing',
                         'startDate' => '2023-01',
                         'endDate' => '',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->update($request);
 
@@ -345,7 +359,8 @@ describe('HTTP Command Handlers', function (): void {
                         'groupId' => $this->group->id,
                         'title' => 'Non-existent',
                         'startDate' => '2023-01',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->update($request);
 
@@ -359,7 +374,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withAttribute('id', (string) $this->item->id)
                     ->withParsedBody([
                         'title' => 'Missing required fields',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->update($request);
 
@@ -381,7 +397,8 @@ describe('HTTP Command Handlers', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('DELETE')
                     ->withUri(new Uri('/cmd/items/' . $this->item->id))
-                    ->withAttribute('id', (string) $this->item->id);
+                    ->withAttribute('id', (string) $this->item->id)
+                ;
 
                 $response = $this->itemCommandHandler->delete($request);
 
@@ -409,7 +426,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withParsedBody([
                         'startDate' => '2023-03',
                         'endDate' => '2023-09',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->resize($request);
 
@@ -429,7 +447,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withParsedBody([
                         'startDate' => '2023-02',
                         'endDate' => '',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->resize($request);
 
@@ -447,7 +466,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withParsedBody([
                         'startDate' => '2023-03',
                         'endDate' => '2023-09',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->resize($request);
 
@@ -461,7 +481,8 @@ describe('HTTP Command Handlers', function (): void {
                     ->withAttribute('id', (string) $this->item->id)
                     ->withParsedBody([
                         'endDate' => '2023-09',
-                    ]);
+                    ])
+                ;
 
                 $response = $this->itemCommandHandler->resize($request);
 

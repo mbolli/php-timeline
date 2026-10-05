@@ -32,7 +32,6 @@ final class UpdatesHandler implements RequestHandlerInterface {
             $response = $response->withHeader($name, $value);
         }
 
-
         // For Swoole, we need to work with the response differently
         // The actual SSE streaming is handled in the Swoole server
         return $response->withHeader('X-SSE-Handler', 'updates');

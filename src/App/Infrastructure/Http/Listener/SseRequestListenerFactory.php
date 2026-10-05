@@ -9,10 +9,8 @@ use App\Infrastructure\EventBus\EventBusInterface;
 use App\Infrastructure\Template\TemplateRenderer;
 use Psr\Container\ContainerInterface;
 
-final class SseRequestListenerFactory
-{
-    public function __invoke(ContainerInterface $container): SseRequestListener
-    {
+final class SseRequestListenerFactory {
+    public function __invoke(ContainerInterface $container): SseRequestListener {
         return new SseRequestListener(
             $container->get(EventBusInterface::class),
             $container->get(GetTimelineHandler::class),
