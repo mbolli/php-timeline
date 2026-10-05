@@ -4,8 +4,8 @@ A full-screen horizontal timeline application for visualizing life events, inspi
 
 This project can serve as a **template for building high-performance PHP applications** using Swoole and Mezzio. It demonstrates how to leverage PSR-7/PSR-15 middleware, PSR-11 dependency injection, real-time SSE streaming, and CQRS+event bus patterns—all running on a persistent Swoole HTTP server for maximum throughput.
 
-[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
-[![Swoole](https://img.shields.io/badge/Swoole-5.0+-007EC6?logo=swoole&logoColor=white)](https://openswoole.com/)
+[![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Swoole](https://img.shields.io/badge/Swoole-6.0+-007EC6?logo=swoole&logoColor=white)](https://www.swoole.com/)
 [![Datastar](https://img.shields.io/badge/Datastar-1.0-FF6B35?logo=rocket&logoColor=white)](https://data-star.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
@@ -27,16 +27,16 @@ This project can serve as a **template for building high-performance PHP applica
 
 | Layer | Technology |
 |-------|------------|
-| Backend | PHP 8.2+, Mezzio 3.19, Swoole 5.0+ |
+| Backend | PHP 8.4+, Mezzio 3.28, Swoole 6.0+ |
 | Database | SQLite (PDO) |
-| Frontend | TypeScript 5.7, esbuild, Datastar 1.0 |
+| Frontend | TypeScript 7, esbuild, Datastar 1.0.4 |
 | Testing | Pest 4.0 |
 | Analysis | PHPStan, PHP-CS-Fixer |
 
 ## Requirements
 
-- PHP 8.2+
-- Swoole extension (`pecl install swoole`)
+- PHP 8.4+
+- Swoole 6 extension (`pecl install swoole`)
 - Node.js 18+ (for frontend build)
 - SQLite3
 
