@@ -40,10 +40,10 @@
          data-on-keys:meta-equal="$_zoom = timeline.clampZoom($_zoom * 1.2)"
          data-on-keys:ctrl-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
          data-on-keys:meta-minus="$_zoom = timeline.clampZoom($_zoom * 0.8)"
-         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(event, $_lastMouseX); $_lastMouseX = event.clientX } else if($_isResizing) { timeline.handleResizeMove(event) }"
+         data-on:mousemove__window="if($_isDragging) { $_panX += timeline.getDragDelta(evt, $_lastMouseX); $_lastMouseX = evt.clientX } else if($_isResizing) { timeline.handleResizeMove(evt) }"
          data-on:mouseup__window="$_isDragging = false; if($_isResizing) { timeline.finishResize(); $_isResizing = false }"
-         data-on:keydown__window="event.key === 'Escape' && $_isResizing && timeline.cancelResize() && ($_isResizing = false)"
-         data-on:mousedown="timeline.startResize(event) && ($_isResizing = true)"
+         data-on:keydown__window="evt.key === 'Escape' && $_isResizing && timeline.cancelResize() && ($_isResizing = false)"
+         data-on:mousedown="timeline.startResize(evt) && ($_isResizing = true)"
          data-indicator="_connected"
          data-init="@get('/updates')">
 
@@ -80,10 +80,10 @@
 
         <!-- Timeline Container -->
         <main class="timeline-wrapper"
-              data-on:wheel="const r = timeline.handleWheel(event, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
-              data-on:mousedown="if(!timeline.isTimelineItem(event)) { $_isDragging = true; $_lastMouseX = event.clientX }"
-              data-on:touchstart="if(event.touches.length === 1 && !timeline.isTimelineItem(event)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(event) }"
-              data-on:touchmove__prevent="if($_isDragging && event.touches.length === 1) { $_panX += timeline.getTouchX(event) - $_lastMouseX; $_lastMouseX = timeline.getTouchX(event) }"
+              data-on:wheel="const r = timeline.handleWheel(evt, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
+              data-on:mousedown="if(!timeline.isTimelineItem(evt)) { $_isDragging = true; $_lastMouseX = evt.clientX }"
+              data-on:touchstart="if(evt.touches.length === 1 && !timeline.isTimelineItem(evt)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(evt) }"
+              data-on:touchmove__prevent="if($_isDragging && evt.touches.length === 1) { $_panX += timeline.getTouchX(evt) - $_lastMouseX; $_lastMouseX = timeline.getTouchX(evt) }"
               data-on:touchend="$_isDragging = false"
               data-style:--zoom-level="$_zoom"
               data-style:--pan-x="$_panX + 'px'">
@@ -97,7 +97,7 @@
         <dialog class="modal" data-class:open="$_showAddItem">
             <div class="modal-content">
                 <h2>Add Timeline Item</h2>
-                <form data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'}); $_showAddItem = false; this.reset()">
+                <form data-on:submit__prevent="@post('/cmd/items', {contentType: 'form'}); $_showAddItem = false; el.reset()">
                     <div class="form-group">
                         <label>Title *</label>
                         <input type="text" name="title" required placeholder="e.g., iPhone 15 Pro">
@@ -140,7 +140,7 @@
         <dialog class="modal" data-class:open="$_showAddGroup">
             <div class="modal-content">
                 <h2>Add Group</h2>
-                <form data-on:submit__prevent="@post('/cmd/groups', {contentType: 'form'}); $_showAddGroup = false; this.reset()">
+                <form data-on:submit__prevent="@post('/cmd/groups', {contentType: 'form'}); $_showAddGroup = false; el.reset()">
                     <div class="form-group">
                         <label>Name *</label>
                         <input type="text" name="name" required placeholder="e.g., Gaming Consoles">

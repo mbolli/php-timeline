@@ -8,10 +8,10 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "esbuild": "^0.27.2",
-        "typescript": "^5.9.3"
+        "esbuild": "^0.28.2",
+        "typescript": "^7.0.2"
     },
     "dependencies": {
-        "@mbolli/datastar-attribute-on-keys": "^1.1.0"
+        "@mbolli/datastar-attribute-on-keys": "^1.2.0"
     }
 }

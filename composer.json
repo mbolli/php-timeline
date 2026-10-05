@@ -4,10 +4,11 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ext-pdo": "*",
         "ext-pdo_sqlite": "*",
         "ext-swoole": "*",
+        "laminas/laminas-cli": "^1.15",
         "laminas/laminas-config-aggregator": "^1.15",
         "laminas/laminas-diactoros": "^3.3",
         "laminas/laminas-servicemanager": "^4.0",
@@ -25,7 +26,6 @@
         "phpstan/extension-installer": "^v1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "rector/type-perfect": "^v2.0",
         "roave/security-advisories": "dev-latest",
         "tomasvotruba/type-coverage": "^2.0"
     },

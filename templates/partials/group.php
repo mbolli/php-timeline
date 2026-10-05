@@ -26,6 +26,7 @@ foreach ($group->items as $item) {
     foreach ($lanes as $laneIndex => $laneEndMonth) {
         if ($startMonths > $laneEndMonth) {
             $lane = $laneIndex;
+
             break;
         }
         $lane = $laneIndex + 1;
@@ -47,16 +48,16 @@ $trackPadding = 8; // Top/bottom padding
 $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
 ?>
 
-<div class="track" 
+<div class="track"
      data-group-id="<?php echo $group->id; ?>"
      data-on:dragover="timeline.dragOverTrack(evt)"
      data-on:dragleave="timeline.dragLeaveTrack(evt)"
      data-on:drop="timeline.dropOnTrack(evt, <?php echo $group->id; ?>)">
-    <div class="track-label" 
+    <div class="track-label"
          style="background: linear-gradient(<?php echo htmlspecialchars($group->color); ?>25, <?php echo htmlspecialchars($group->color); ?>25), var(--color-surface); border-left: 4px solid <?php echo htmlspecialchars($group->color); ?>; min-height: <?php echo $trackHeight; ?>px;">
-        <span class="drag-handle" 
+        <span class="drag-handle"
               draggable="true"
-              data-on:mousedown__stop="event.stopPropagation()"
+              data-on:mousedown__stop="evt.stopPropagation()"
               data-on:dragstart="timeline.startDragGroup(evt, <?php echo $group->id; ?>)"
               data-on:dragend="timeline.endDragGroup(evt)">
             <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
@@ -88,12 +89,12 @@ $trackHeight = ($laneCount * ($itemHeight + 4)) + ($trackPadding * 2);
                  style="--item-left: <?php echo $pos['left']; ?>; --item-width: <?php echo $pos['width']; ?>; top: <?php echo $top; ?>px; height: <?php echo $itemHeight; ?>px; background-color: <?php echo htmlspecialchars($itemColor); ?>;"
                  data-on:click="!timeline.wasResizing() && @get('/query/items/<?php echo $item->id; ?>')"
                  title="<?php echo htmlspecialchars($item->title); ?>&#10;<?php echo $item->startDate; ?> → <?php echo $item->endDate ?? 'ongoing'; ?>">
-                <div class="resize-handle resize-handle-start" data-handle="start" data-on:click__prevent__stop="event.stopPropagation()"></div>
+                <div class="resize-handle resize-handle-start" data-handle="start" data-on:click__prevent__stop="evt.stopPropagation()"></div>
                 <span class="item-title"><?php echo htmlspecialchars($item->title); ?></span>
                 <?php if ($item->isOngoing()) { ?>
                 <span class="ongoing-indicator">→</span>
                 <?php } ?>
-                <div class="resize-handle resize-handle-end" data-handle="end" data-on:click__prevent__stop="event.stopPropagation()"></div>
+                <div class="resize-handle resize-handle-end" data-handle="end" data-on:click__prevent__stop="evt.stopPropagation()"></div>
             </div>
             <?php } ?>
         <?php } ?>
