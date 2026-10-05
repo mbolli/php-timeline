@@ -132,13 +132,6 @@ const timeline = {
     },
 
     /**
-     * Get touch X position
-     */
-    getTouchX(e: TouchEvent): number {
-        return e.touches[0]?.clientX ?? 0;
-    },
-
-    /**
      * Check if event target is a timeline item (should not drag)
      */
     isTimelineItem(e: MouseEvent | TouchEvent): boolean {

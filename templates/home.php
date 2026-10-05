@@ -86,9 +86,6 @@ $isProduction = getenv('APP_ENV') === 'production';
         <main class="timeline-wrapper"
               data-on:wheel="const r = timeline.handleWheel(evt, $_zoom, $_panX); if(r) { $_zoom = r.zoom; $_panX = r.panX }"
               data-on:mousedown="if(!timeline.isTimelineItem(evt) && !timeline.isControl(evt)) { $_isDragging = true; $_lastMouseX = evt.clientX }"
-              data-on:touchstart="if(evt.touches.length === 1 && !timeline.isTimelineItem(evt) && !timeline.isControl(evt)) { $_isDragging = true; $_lastMouseX = timeline.getTouchX(evt) }"
-              data-on:touchmove__prevent="if($_isDragging && evt.touches.length === 1) { $_panX = timeline.clampPan($_panX + timeline.getTouchX(evt) - $_lastMouseX); $_lastMouseX = timeline.getTouchX(evt) }"
-              data-on:touchend="$_isDragging = false"
               data-on:scroll="const p = timeline.panFromScroll(el); if (p !== null) { $_panX = p }"
               data-effect="const pan = $_panX; $_zoom; timeline.applyPan(el, pan)"
               data-style:--zoom-level="$_zoom">
