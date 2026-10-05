@@ -12,6 +12,7 @@ use App\Application\Command\ReorderGroups\ReorderGroupsCommand;
 use App\Application\Command\ReorderGroups\ReorderGroupsHandler;
 use App\Application\Command\UpdateGroup\UpdateGroupCommand;
 use App\Application\Command\UpdateGroup\UpdateGroupHandler;
+use App\Infrastructure\Http\TimelineInput;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -26,10 +27,9 @@ final class GroupCommandHandler {
     ) {}
 
     public function create(ServerRequestInterface $request): ResponseInterface {
-        $data = $this->getRequestData($request);
-
-        if (!isset($data['name'])) {
-            return new JsonResponse(['error' => 'Missing required fields'], 400);
+        [$data, $errors] = TimelineInput::group($this->getRequestData($request));
+        if ($errors !== []) {
+            return self::invalid($errors);
         }
 
         $command = CreateGroupCommand::fromArray($data);
@@ -40,10 +40,9 @@ final class GroupCommandHandler {
 
     public function update(ServerRequestInterface $request): ResponseInterface {
         $id = (int) $request->getAttribute('id');
-        $data = $this->getRequestData($request);
-
-        if (!isset($data['name'])) {
-            return new JsonResponse(['error' => 'Missing required fields'], 400);
+        [$data, $errors] = TimelineInput::group($this->getRequestData($request));
+        if ($errors !== []) {
+            return self::invalid($errors);
         }
 
         $command = UpdateGroupCommand::fromArray($id, $data);
@@ -80,6 +79,13 @@ final class GroupCommandHandler {
         ($this->reorderHandler)($command);
 
         return new EmptyResponse(204);
+    }
+
+    /**
+     * @param array<string, string> $errors
+     */
+    private static function invalid(array $errors): ResponseInterface {
+        return new JsonResponse(['error' => 'Invalid input', 'fields' => $errors], 422);
     }
 
     /**

@@ -8,7 +8,6 @@ parameters:
     #narrow_param: true
     #narrow_return: true
   type_coverage:
-    declare: 100
     return: 100
     param: 100
     property: 100

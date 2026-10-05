@@ -12,6 +12,8 @@ use App\Application\Command\ResizeItem\ResizeItemCommand;
 use App\Application\Command\ResizeItem\ResizeItemHandler;
 use App\Application\Command\UpdateItem\UpdateItemCommand;
 use App\Application\Command\UpdateItem\UpdateItemHandler;
+use App\Domain\Repository\TimelineRepositoryInterface;
+use App\Infrastructure\Http\TimelineInput;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -23,13 +25,13 @@ final class ItemCommandHandler {
         private readonly UpdateItemHandler $updateHandler,
         private readonly DeleteItemHandler $deleteHandler,
         private readonly ResizeItemHandler $resizeHandler,
+        private readonly TimelineRepositoryInterface $repository,
     ) {}
 
     public function create(ServerRequestInterface $request): ResponseInterface {
-        $data = $this->getRequestData($request);
-
-        if (!isset($data['groupId'], $data['title'], $data['startDate'])) {
-            return new JsonResponse(['error' => 'Missing required fields'], 400);
+        [$data, $errors] = TimelineInput::item($this->getRequestData($request), $this->groupExists(...));
+        if ($errors !== []) {
+            return self::invalid($errors);
         }
 
         $command = CreateItemCommand::fromArray($data);
@@ -41,10 +43,9 @@ final class ItemCommandHandler {
 
     public function update(ServerRequestInterface $request): ResponseInterface {
         $id = (int) $request->getAttribute('id');
-        $data = $this->getRequestData($request);
-
-        if (!isset($data['groupId'], $data['title'], $data['startDate'])) {
-            return new JsonResponse(['error' => 'Missing required fields'], 400);
+        [$data, $errors] = TimelineInput::item($this->getRequestData($request), $this->groupExists(...));
+        if ($errors !== []) {
+            return self::invalid($errors);
         }
 
         $command = UpdateItemCommand::fromArray($id, $data);
@@ -72,10 +73,9 @@ final class ItemCommandHandler {
 
     public function resize(ServerRequestInterface $request): ResponseInterface {
         $id = (int) $request->getAttribute('id');
-        $data = $this->getRequestData($request);
-
-        if (!isset($data['startDate'])) {
-            return new JsonResponse(['error' => 'Missing required startDate field'], 400);
+        [$data, $errors] = TimelineInput::resize($this->getRequestData($request));
+        if ($errors !== []) {
+            return self::invalid($errors);
         }
 
         $command = ResizeItemCommand::fromArray($id, $data);
@@ -86,6 +86,17 @@ final class ItemCommandHandler {
         }
 
         return new EmptyResponse(204);
+    }
+
+    private function groupExists(int $id): bool {
+        return $this->repository->getGroupById($id) !== null;
+    }
+
+    /**
+     * @param array<string, string> $errors
+     */
+    private static function invalid(array $errors): ResponseInterface {
+        return new JsonResponse(['error' => 'Invalid input', 'fields' => $errors], 422);
     }
 
     /**

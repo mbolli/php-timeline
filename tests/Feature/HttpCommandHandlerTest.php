@@ -51,6 +51,7 @@ describe('HTTP Command Handlers', function (): void {
             $this->updateItemHandler,
             $this->deleteItemHandler,
             $this->resizeItemHandler,
+            $this->repository,
         );
 
         // Create a default group for item tests
@@ -102,7 +103,7 @@ describe('HTTP Command Handlers', function (): void {
                 expect($groups[1]->name)->toBe('Gaming Consoles');
             });
 
-            it('returns 400 when name is missing', function (): void {
+            it('returns 422 when name is missing', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('POST')
                     ->withUri(new Uri('/cmd/groups'))
@@ -113,7 +114,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->groupCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(400);
+                expect($response->getStatusCode())->toBe(422);
             });
         });
 
@@ -276,7 +277,7 @@ describe('HTTP Command Handlers', function (): void {
                 expect($items[0]->isOngoing())->toBeTrue();
             });
 
-            it('returns 400 when required fields are missing', function (): void {
+            it('returns 422 when required fields are missing', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('POST')
                     ->withUri(new Uri('/cmd/items'))
@@ -287,7 +288,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(400);
+                expect($response->getStatusCode())->toBe(422);
             });
         });
 
@@ -367,7 +368,7 @@ describe('HTTP Command Handlers', function (): void {
                 expect($response->getStatusCode())->toBe(404);
             });
 
-            it('returns 400 when required fields are missing', function (): void {
+            it('returns 422 when required fields are missing', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('PUT')
                     ->withUri(new Uri('/cmd/items/' . $this->item->id))
@@ -379,7 +380,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->update($request);
 
-                expect($response->getStatusCode())->toBe(400);
+                expect($response->getStatusCode())->toBe(422);
             });
         });
 
@@ -474,7 +475,7 @@ describe('HTTP Command Handlers', function (): void {
                 expect($response->getStatusCode())->toBe(404);
             });
 
-            it('returns 400 when startDate is missing', function (): void {
+            it('returns 422 when startDate is missing', function (): void {
                 $request = (new ServerRequest())
                     ->withMethod('PATCH')
                     ->withUri(new Uri('/cmd/items/' . $this->item->id . '/resize'))
@@ -486,7 +487,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->resize($request);
 
-                expect($response->getStatusCode())->toBe(400);
+                expect($response->getStatusCode())->toBe(422);
             });
         });
     });

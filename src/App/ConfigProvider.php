@@ -29,6 +29,7 @@ use App\Infrastructure\Http\Handler\UpdatesHandler;
 use App\Infrastructure\Http\Listener\SseRequestListener;
 use App\Infrastructure\Http\Listener\SseRequestListenerFactory;
 use App\Infrastructure\Http\Middleware\JsonBodyParserMiddleware;
+use App\Infrastructure\Persistence\SqliteConnection;
 use App\Infrastructure\Persistence\SqliteTimelineRepository;
 use App\Infrastructure\Template\TemplateRenderer;
 use PDO;
@@ -54,25 +55,10 @@ final class ConfigProvider {
         return [
             'factories' => [
                 // PDO
-                \PDO::class => function (ContainerInterface $container): \PDO {
-                    $config = $container->get('config');
-                    $dsn = $config['database']['dsn'];
-
-                    $pdo = new \PDO($dsn);
-                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-                    $pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-
-                    // Initialize schema if database is empty
-                    $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll();
-                    if (empty($tables)) {
-                        $schemaPath = realpath(__DIR__ . '/../data/schema.sql');
-                        if ($schemaPath && file_exists($schemaPath)) {
-                            $pdo->exec(file_get_contents($schemaPath));
-                        }
-                    }
-
-                    return $pdo;
-                },
+                \PDO::class => fn (ContainerInterface $container): \PDO => SqliteConnection::open(
+                    $container->get('config')['database']['dsn'],
+                    __DIR__ . '/../../data/schema.sql',
+                ),
 
                 // Template Renderer
                 TemplateRenderer::class => function (ContainerInterface $container): TemplateRenderer {
@@ -182,7 +168,8 @@ final class ConfigProvider {
                     $container->get(CreateItemHandler::class),
                     $container->get(UpdateItemHandler::class),
                     $container->get(DeleteItemHandler::class),
-                    $container->get(ResizeItemHandler::class)
+                    $container->get(ResizeItemHandler::class),
+                    $container->get(TimelineRepositoryInterface::class),
                 ),
 
                 // Route method handlers for Items
