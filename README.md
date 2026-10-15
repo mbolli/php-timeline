@@ -279,3 +279,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 *Need help taming complexity in your PHP stack?* [zwei und eins gmbh](https://zweiundeins.gmbh) specializes in high-performance web applications.
+
+## Maintainer
+
+Maintained by [Michael Bolli](https://github.com/mbolli) at [zwei und eins gmbh](https://zweiundeins.gmbh), Aarberg, Switzerland.
