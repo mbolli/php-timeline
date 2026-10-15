@@ -22,7 +22,7 @@ $isProduction = getenv('APP_ENV') === 'production';
     </script>
     <script type="module" src="/js/datastar.js"></script>
     <script type="module" src="/js/app.js"></script>
-    <link rel="stylesheet" href="/css/timeline.css">
+    <link rel="stylesheet" href="/css/timeline.css?v=<?php echo filemtime(__DIR__ . '/../public/css/timeline.css'); ?>">
 </head>
 <body>
     <div id="app"
@@ -33,7 +33,8 @@ $isProduction = getenv('APP_ENV') === 'production';
             "_isResizing": false,
             "_lastMouseX": 0,
             "_showAddItem": false,
-            "_showAddGroup": false
+            "_showAddGroup": false,
+            "_showAbout": false
          }'
          data-on-keys:left__noprevent="timeline.canUseKeys() && ($_panX = timeline.clampPan($_panX + 100))"
          data-on-keys:right__noprevent="timeline.canUseKeys() && ($_panX = timeline.clampPan($_panX - 100))"
@@ -80,6 +81,10 @@ $isProduction = getenv('APP_ENV') === 'production';
                     <span data-show="$_connected">Live</span>
                     <span data-show="!$_connected">Offline</span>
                 </span>
+                <button type="button" class="btn btn-icon" aria-label="About" title="About" aria-haspopup="dialog"
+                        data-on:click="$_showAbout = true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+                </button>
             </div>
         </header>
 
@@ -160,6 +165,8 @@ $isProduction = getenv('APP_ENV') === 'production';
                 </div>
             </form>
         </dialog>
+
+        <?php include __DIR__ . '/partials/about-modal.php'; ?>
 
         <?php if (!$isProduction) { ?>
         <details class="debug-panel">
