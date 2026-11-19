@@ -2,6 +2,13 @@ parameters:
   level: 6
   paths:
     - src/
+  ignoreErrors:
+    # OpenSwoole's arginfo declares Timer::clear() without parameters; Swoole 6 does not need this
+    -
+      identifier: arguments.count
+      message: '#^Static method OpenSwoole\\Timer::clear\(\) invoked with 1 parameter, 0 required\.$#'
+      path: src/App/Infrastructure/Http/Listener/SseRequestListener.php
+      reportUnmatched: false
   type_perfect:
     null_over_false: true
     no_mixed: true

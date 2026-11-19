@@ -35,7 +35,7 @@ final class ItemCommandHandler {
         }
 
         $command = CreateItemCommand::fromArray($data);
-        $item = ($this->createHandler)($command);
+        ($this->createHandler)($command);
 
         // Return 204 No Content - the SSE will push the update
         return new EmptyResponse(204);

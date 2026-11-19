@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@mbolli/datastar-attribute-on-keys':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       esbuild:
         specifier: ^0.28.2
@@ -177,8 +177,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@mbolli/datastar-attribute-on-keys@1.2.0':
-    resolution: {integrity: sha512-xZM10HoHX8V4TX0CXt9O0pPH+Ku4Nc3nZSG4onzvRMXDB2a3ZCQH4nyAjSjDtHyl1UNOPtxSClV7NTJN3W8vNA==}
+  '@mbolli/datastar-attribute-on-keys@2.0.0':
+    resolution: {integrity: sha512-IT3gNgexHtlvyOz9BKCeOck0v03p178i0BYWAbtwiJUcghOzRdz51KdyVtyZI2ymFKEgE6oadDFFUOtLUlHUig==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -390,7 +390,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@mbolli/datastar-attribute-on-keys@1.2.0': {}
+  '@mbolli/datastar-attribute-on-keys@2.0.0': {}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true

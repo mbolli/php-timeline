@@ -8,26 +8,26 @@
         "ext-pdo": "*",
         "ext-pdo_sqlite": "*",
         "ext-swoole": "*",
-        "laminas/laminas-cli": "^1.15",
-        "laminas/laminas-config-aggregator": "^1.15",
-        "laminas/laminas-diactoros": "^3.3",
-        "laminas/laminas-servicemanager": "^4.0",
-        "mezzio/mezzio": "^3.19",
-        "mezzio/mezzio-fastroute": "^3.11",
-        "mezzio/mezzio-helpers": "^5.16",
-        "mezzio/mezzio-swoole": "^4.9",
-        "starfederation/datastar-php": "^1.0.0-RC.5"
+        "laminas/laminas-cli": "^1.16",
+        "laminas/laminas-config-aggregator": "^1.21",
+        "laminas/laminas-diactoros": "^3.10",
+        "laminas/laminas-servicemanager": "^4.6",
+        "mezzio/mezzio": "^3.29",
+        "mezzio/mezzio-fastroute": "^3.15",
+        "mezzio/mezzio-helpers": "^5.21",
+        "mezzio/mezzio-swoole": "^4.14",
+        "starfederation/datastar-php": "^1.0.3"
     },
     "require-dev": {
         "ext-inotify": "*",
-        "friendsofphp/php-cs-fixer": "^3.67",
-        "mockery/mockery": "^1.6",
-        "pestphp/pest": "^4.0",
-        "phpstan/extension-installer": "^v1.4",
-        "phpstan/phpstan": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "mockery/mockery": "^1.6.15",
+        "pestphp/pest": "^5.3",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.3",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "roave/security-advisories": "dev-latest",
-        "tomasvotruba/type-coverage": "^2.0"
+        "tomasvotruba/type-coverage": "^2.5"
     },
     "autoload": {
         "psr-4": {
@@ -44,7 +44,10 @@
         "cs": "php-cs-fixer fix --dry-run --diff",
         "cs:fix": "php-cs-fixer fix",
         "stan": "phpstan analyse",
-        "serve": "./vendor/bin/laminas mezzio:swoole:start",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "./vendor/bin/laminas mezzio:swoole:start"
+        ],
         "stop": "./vendor/bin/laminas mezzio:swoole:stop",
         "db:seed": "php bin/seed.php"
     },
@@ -56,6 +59,5 @@
         "sort-packages": true,
         "optimize-autoloader": true
     },
-    "minimum-stability": "RC",
     "prefer-stable": true
 }

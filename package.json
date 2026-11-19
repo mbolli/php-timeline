@@ -12,6 +12,6 @@
         "typescript": "^7.0.2"
     },
     "dependencies": {
-        "@mbolli/datastar-attribute-on-keys": "^1.2.0"
+        "@mbolli/datastar-attribute-on-keys": "^2.0.0"
     }
 }

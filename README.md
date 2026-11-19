@@ -6,8 +6,9 @@ This project can serve as a **template for building high-performance PHP applica
 
 [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Swoole](https://img.shields.io/badge/Swoole-6.0+-007EC6?logo=swoole&logoColor=white)](https://www.swoole.com/)
-[![Datastar](https://img.shields.io/badge/Datastar-1.0-FF6B35?logo=rocket&logoColor=white)](https://data-star.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![OpenSwoole](https://img.shields.io/badge/OpenSwoole-26+-007EC6)](https://openswoole.com/)
+[![Datastar](https://img.shields.io/badge/Datastar-1.0.5-FF6B35?logo=rocket&logoColor=white)](https://data-star.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Made by zweiundeins.gmbh](https://img.shields.io/badge/Made%20with%20%E2%98%95%20by-zweiundeins.gmbh-blue)](https://zweiundeins.gmbh)
@@ -27,18 +28,20 @@ This project can serve as a **template for building high-performance PHP applica
 
 | Layer | Technology |
 |-------|------------|
-| Backend | PHP 8.4+, Mezzio 3.28, Swoole 6.0+ |
+| Backend | PHP 8.4+, Mezzio 3.29, mezzio-swoole 4.14, Swoole 6.0+ or OpenSwoole 26+, datastar-php 1.0.3 |
 | Database | SQLite (PDO) |
-| Frontend | TypeScript 7, esbuild, Datastar 1.0.4 |
-| Testing | Pest 4.0 |
-| Analysis | PHPStan, PHP-CS-Fixer |
+| Frontend | TypeScript 7, esbuild 0.28, Datastar 1.0.5, pnpm |
+| Testing | Pest 5 (PHPUnit 13) |
+| Analysis | PHPStan 2.3, PHP-CS-Fixer 3.95 |
 
 ## Requirements
 
 - PHP 8.4+
-- Swoole 6 extension (`pecl install swoole`)
-- Node.js 18+ (for frontend build)
+- Swoole 6 extension (`pecl install swoole`) or OpenSwoole 26+
+- Node.js 18+ and pnpm (for frontend build)
 - SQLite3
+
+mezzio-swoole requires `ext-swoole`, which Composer does not see when OpenSwoole is installed. With OpenSwoole, run Composer with `--ignore-platform-req=ext-swoole`. Add `--ignore-platform-req=ext-inotify` when the inotify extension for hot code reloading is not installed. OpenSwoole also lacks `swoole_set_process_name()`; `config/container.php` falls back to `cli_set_process_title()` in that case.
 
 ## Installation
 
@@ -51,10 +54,10 @@ cd php-timeline
 composer install
 
 # Install Node dependencies
-npm install
+pnpm install
 
 # Build frontend assets
-npm run build
+pnpm build
 
 # Copy environment config (for development)
 cp config/autoload/local.php.dist config/autoload/local.php
@@ -101,9 +104,9 @@ composer cs:fix     # Fix code style
 composer db:seed    # Seed database with sample data
 
 # Frontend
-npm run build       # Build TypeScript (minified)
-npm run watch       # Watch mode for development
-npm run typecheck   # Type-check without emitting
+pnpm build          # Build TypeScript (minified)
+pnpm watch          # Watch mode for development
+pnpm typecheck      # Type-check without emitting
 ```
 
 ### Project Structure

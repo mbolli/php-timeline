@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Dependencies updated: Datastar 1.0.5, datastar-php 1.0.3, Mezzio 3.29, laminas-cli 1.16, laminas-diactoros 3.10, laminas-servicemanager 4.6, PHPStan 2.3, php-cs-fixer 3.95.32, type-coverage 2.5, `@mbolli/datastar-attribute-on-keys` 2.0
+- Pest 5 on PHPUnit 13 replaces Pest 4 on PHPUnit 12
+- Composer no longer needs `minimum-stability: RC`, since datastar-php is stable
+- `composer serve` no longer stops after Composer's 300 second process timeout
+- The README lists pnpm instead of npm and the current versions
+
+### Fixed
+
+- The server starts on OpenSwoole, which has no `swoole_set_process_name()`
+- Ctrl+Minus zooms out: on-keys 2.0 maps `minus` to the `-` key, which 1.2 did not
+
 ## [0.3.1] - 2026-10-05
 
 ### Fixed
