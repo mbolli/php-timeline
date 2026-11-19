@@ -266,6 +266,15 @@ The frontend uses [Datastar](https://data-star.dev/) for declarative reactivity:
 | DELETE | `/cmd/groups/{id}` | Delete a group |
 | PUT | `/cmd/groups/reorder` | Reorder groups (drag & drop) |
 
+## Deployment
+
+`deploy/deploy.sh [ref]` deploys a commit from GitHub (default `origin/master`, so push first) to the
+checkout on the server, over SSH as a user with passwordless sudo. It stops when the server has
+uncommitted changes, copies `data/timeline.db` to `data/backups/` and puts it back after the checkout,
+runs `composer install --no-dev`, restarts the `timeline` service and waits until the app answers.
+`DEPLOY_HOST`, `DEPLOY_DIR` and `DEPLOY_PORT` override the defaults (`libretto`, `/opt/php-timeline`, 7103).
+To roll back, deploy the previous commit; the script prints it.
+
 ## Sample Data Categories
 
 The seeder includes example data for:
