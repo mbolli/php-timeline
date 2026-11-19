@@ -107,7 +107,23 @@ composer db:seed    # Seed database with sample data
 pnpm build          # Build TypeScript (minified)
 pnpm watch          # Watch mode for development
 pnpm typecheck      # Type-check without emitting
+pnpm test:e2e       # Playwright end-to-end tests
 ```
+
+### End-to-end tests
+
+`pnpm test:e2e` runs the Playwright tests in `tests/e2e/`. They start their own server on port 3190
+with a freshly seeded database in the temp directory, so `data/timeline.db` and a running dev server
+stay untouched. The tests use the Chromium at `/usr/bin/chromium`; no browser is downloaded.
+
+| Variable | Meaning |
+|----------|---------|
+| `E2E_PORT` | Port of the test server (default 3190) |
+| `E2E_CHROMIUM` | Path of the Chromium binary |
+
+The server itself reads three variables, which win over the config files:
+`TIMELINE_PORT`, `TIMELINE_DB` (path of the SQLite file) and `TIMELINE_PID_FILE`.
+`php bin/seed.php <file>` seeds another database file than the default.
 
 ### Project Structure
 

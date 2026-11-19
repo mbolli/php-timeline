@@ -5,9 +5,11 @@
     "scripts": {
         "build": "esbuild src/ts/main.ts --bundle --outfile=public/js/app.js --minify --sourcemap",
         "watch": "esbuild src/ts/main.ts --bundle --outfile=public/js/app.js --watch --sourcemap",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "test:e2e": "playwright test"
     },
     "devDependencies": {
+        "@playwright/test": "^1.65.1",
         "esbuild": "^0.28.2",
         "typescript": "^7.0.2"
     },
