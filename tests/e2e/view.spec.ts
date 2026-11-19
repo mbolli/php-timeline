@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openApp, scrollLeft, swipe, wrapper, zoomPercent } from './support/app';
+import { openApp, scrollLeft, swipe, unlock, wrapper, zoomPercent } from './support/app';
 
 test.describe('opening view and grid', () => {
     test('opens on today with a labelled marker', async ({ page }) => {
@@ -169,6 +169,7 @@ test.describe('phone layout', () => {
 
     test('opens dialogs as a sheet at the bottom edge', async ({ page }) => {
         await openApp(page);
+        await unlock(page);
         await page.getByRole('button', { name: 'New item' }).click();
 
         const dialog = page.getByRole('dialog', { name: 'New item' });
@@ -183,6 +184,7 @@ test.describe('phone layout', () => {
 
     test('reorders groups without drag and drop', async ({ page }) => {
         await openApp(page);
+        await unlock(page);
         await expect(page.locator('.drag-handle').first()).toBeHidden();
 
         const order = await page.locator('.track').evaluateAll(els => els.map(el => (el as HTMLElement).dataset.groupId));

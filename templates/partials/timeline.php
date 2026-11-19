@@ -29,8 +29,8 @@ $groupCount = count($groups);
         <div class="ruler-corner">
             <span class="ruler-corner-title">Groups</span>
             <span class="ruler-corner-count" aria-label="<?php echo $groupCount; ?> groups"><?php echo $groupCount; ?></span>
-            <button type="button" class="icon-btn" aria-label="Add group" title="Add group (G)"
-                    data-on:click="$_showAddGroup = true">
+            <button type="button" class="icon-btn edit-only" aria-label="Add group" title="Add group (G)"
+                    data-on:click="timeline.isLocked() || ($_showAddGroup = true)">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             </button>
         </div>
@@ -61,7 +61,7 @@ $groupCount = count($groups);
             </svg>
             <p class="empty-state-title">Nothing on the timeline yet</p>
             <p>Groups are the rows of the timeline: phones, homes, jobs. Start with one.</p>
-            <button type="button" class="btn btn-primary" data-on:click="$_showAddGroup = true">Add the first group</button>
+            <button type="button" class="btn btn-primary edit-only" data-on:click="timeline.isLocked() || ($_showAddGroup = true)">Add the first group</button>
         </div>
         <?php } else { ?>
             <?php foreach ($groups as $group) { ?>

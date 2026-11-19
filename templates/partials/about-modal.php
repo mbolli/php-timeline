@@ -29,6 +29,8 @@
                     <div><dt><kbd>/</kbd></dt><dd>Find an item or a year</dd></div>
                     <div><dt><kbd>N</kbd></dt><dd>New item</dd></div>
                     <div><dt><kbd>G</kbd></dt><dd>New group</dd></div>
+                    <div><dt><kbd>L</kbd></dt><dd>Lock or unlock editing</dd></div>
+                    <div><dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo the last change</dd></div>
                     <div><dt><kbd>Esc</kbd></dt><dd>Close a dialog, cancel a resize</dd></div>
                 </dl>
                 <p class="about-note">

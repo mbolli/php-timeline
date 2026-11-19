@@ -32,6 +32,18 @@ interface SendResult {
     status: number;
     error: string;
     fields: Record<string, string>;
+    data: Record<string, unknown>;
+}
+
+interface HistoryEntry {
+    label: string;
+    undone: string;
+    undo: () => Promise<SendResult>;
+}
+
+interface ToastAction {
+    label: string;
+    run: () => void;
 }
 
 interface PendingConfirm {
@@ -40,6 +52,8 @@ interface PendingConfirm {
 }
 
 const MONTH_WIDTH = 20;
+const LOCK_KEY = 'timeline.locked';
+const HISTORY_LIMIT = 50;
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 let resizeState: ResizeState | null = null;
@@ -52,6 +66,14 @@ let pendingConfirm: PendingConfirm | null = null;
 let returnFocus: { itemId: string | null; trackId: string | null } = { itemId: null, trackId: null };
 // The group the user last saw selected in the add-item form, to survive live updates of the list
 let chosenGroup = '';
+let locked = false;
+// Changes this tab made, newest last, each with the command that reverts it
+const history: HistoryEntry[] = [];
+let undoQueue: Promise<unknown> = Promise.resolve();
+// Commands still on their way: an undo waits for them, so it reverts the change the user last saw
+const commandsInFlight = new Set<Promise<SendResult>>();
+// What an edit dialog's form held when it opened: the state an undo of its save goes back to
+const formSnapshots = new WeakMap<HTMLFormElement, FormData>();
 
 const timeline = {
     /**
@@ -256,13 +278,27 @@ const timeline = {
     /**
      * Show a short message at the bottom of the screen; the container is a live region
      */
-    toast(message: string, kind: 'info' | 'error' = 'info'): void {
+    toast(message: string, kind: 'info' | 'error' = 'info', action?: ToastAction): void {
         const host = document.getElementById('toasts');
         if (!host) return;
 
         const toast = document.createElement('div');
         toast.className = `toast toast-${kind}`;
-        toast.textContent = message;
+        const text = document.createElement('span');
+        text.className = 'toast-message';
+        text.textContent = message;
+        toast.append(text);
+        if (action) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'toast-action';
+            button.textContent = action.label;
+            button.addEventListener('click', () => {
+                toast.remove();
+                action.run();
+            }, { once: true });
+            toast.append(button);
+        }
         host.replaceChildren(toast);
         // Re-open the popover so it sits above a dialog that was opened in the meantime
         if (host.matches(':popover-open')) host.hidePopover();
@@ -270,16 +306,30 @@ const timeline = {
         setTimeout(() => {
             toast.remove();
             if (host.childElementCount === 0 && host.matches(':popover-open')) host.hidePopover();
-        }, kind === 'error' ? 8000 : 3000);
+        }, kind === 'error' ? 8000 : action ? 6000 : 3000);
     },
 
     /**
      * Send a command and report how it went instead of throwing
      */
-    async send(method: string, url: string, body?: BodyInit, headers?: Record<string, string>): Promise<SendResult> {
+    send(method: string, url: string, body?: BodyInit, headers?: Record<string, string>): Promise<SendResult> {
+        const request = this.request(method, url, body, headers);
+        commandsInFlight.add(request);
+        void request.finally(() => commandsInFlight.delete(request));
+
+        return request;
+    },
+
+    async request(method: string, url: string, body?: BodyInit, headers?: Record<string, string>): Promise<SendResult> {
         try {
             const response = await fetch(url, { method, body, headers });
-            if (response.ok) return { ok: true, status: response.status, error: '', fields: {} };
+            if (response.ok) {
+                const data = response.headers.get('Content-Type')?.includes('json')
+                    ? await response.json().catch(() => ({})) as Record<string, unknown>
+                    : {};
+
+                return { ok: true, status: response.status, error: '', fields: {}, data };
+            }
 
             const data = await response.json().catch(() => ({})) as { error?: string; fields?: Record<string, string> };
 
@@ -288,10 +338,167 @@ const timeline = {
                 status: response.status,
                 error: data.error ?? `The server answered with an error (${response.status}).`,
                 fields: data.fields ?? {},
+                data: {},
             };
         } catch {
-            return { ok: false, status: 0, error: 'The server could not be reached.', fields: {} };
+            return { ok: false, status: 0, error: 'The server could not be reached.', fields: {}, data: {} };
         }
+    },
+
+    // --- Edit lock ------------------------------------------------------------------------------------
+
+    /**
+     * Without a stored choice, touch screens start locked: a stray drag there changes dates
+     */
+    storedLock(): boolean {
+        try {
+            const stored = localStorage.getItem(LOCK_KEY);
+            if (stored === '1' || stored === '0') return stored === '1';
+        } catch {
+            // Storage is blocked: use the default
+        }
+        try {
+            return matchMedia('(pointer: coarse)').matches;
+        } catch {
+            return false;
+        }
+    },
+
+    isLocked(): boolean {
+        return locked;
+    },
+
+    setLocked(value: boolean, remember = true): void {
+        locked = value;
+        document.documentElement.classList.toggle('is-locked', value);
+        const button = document.getElementById('lock-toggle');
+        button?.setAttribute('aria-pressed', String(value));
+        button?.setAttribute('title', value ? 'Editing is locked. Unlock (L)' : 'Lock editing (L)');
+        if (!remember) return;
+        try {
+            localStorage.setItem(LOCK_KEY, value ? '1' : '0');
+        } catch {
+            // Not remembered; the lock still holds for this page
+        }
+    },
+
+    toggleLock(): void {
+        this.setLocked(!locked);
+    },
+
+    /**
+     * The L key, without modifiers, outside fields and dialogs
+     */
+    lockKey(e: KeyboardEvent): void {
+        if (e.ctrlKey || e.metaKey || e.altKey || !this.canUseKeys()) return;
+        e.preventDefault();
+        this.toggleLock();
+    },
+
+    /**
+     * True while locked, with a hint for the keyboard shortcut that tried to edit
+     */
+    blockedByLock(): boolean {
+        if (locked) this.toast('Editing is locked. Press L to unlock.');
+
+        return locked;
+    },
+
+    /**
+     * Turn an edit dialog the server sent into a read-only view: the fields stay readable, nothing can be saved
+     */
+    makeReadOnly(dialog: HTMLDialogElement): void {
+        const form = dialog.querySelector('form');
+        if (!form) return;
+
+        dialog.classList.add('is-readonly');
+        form.dataset.readonly = '';
+        const heading = dialog.querySelector('.modal-header h2');
+        if (heading) heading.textContent = heading.textContent === 'Edit group' ? 'Group details' : 'Item details';
+
+        form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[type="text"], input[type="month"], textarea').forEach(field => {
+            field.readOnly = true;
+            field.removeAttribute('autofocus');
+        });
+        form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>('select, input[type="color"], input[type="checkbox"], .swatch').forEach(field => {
+            field.disabled = true;
+        });
+        form.querySelectorAll('[type="submit"], .btn-danger, .field:has(.btn-row)').forEach(element => element.remove());
+
+        const close = form.querySelector('.modal-actions .btn') as HTMLButtonElement | null;
+        if (close) {
+            close.textContent = 'Close';
+            close.autofocus = true;
+        }
+        const note = document.createElement('p');
+        note.className = 'readonly-note';
+        note.textContent = 'Editing is locked';
+        form.querySelector('.modal-actions')?.prepend(note);
+    },
+
+    // --- Undo -----------------------------------------------------------------------------------------
+
+    /**
+     * Remember a change this tab made and offer to undo it
+     */
+    record(label: string, undo: () => Promise<SendResult>, undone = `Undone: ${label}`): void {
+        const entry: HistoryEntry = { label, undone, undo };
+        history.push(entry);
+        if (history.length > HISTORY_LIMIT) history.shift();
+        this.toast(label, 'info', { label: 'Undo', run: () => { void this.undo(entry); } });
+    },
+
+    /**
+     * Revert the latest change, or the given one, through the normal commands, so every tab sees it.
+     * The change leaves the history even when the server refuses, for example because it was deleted elsewhere.
+     */
+    undo(entry?: HistoryEntry): Promise<boolean> {
+        // Quick presses queue up, each undoing one step
+        const next = undoQueue.then(() => this.undoNow(entry));
+        undoQueue = next.catch(() => false);
+
+        return next;
+    },
+
+    async undoNow(entry?: HistoryEntry): Promise<boolean> {
+        while (commandsInFlight.size > 0) {
+            await Promise.allSettled([...commandsInFlight]);
+            // Let the code that sent the command record it first
+            await new Promise(resolve => setTimeout(resolve));
+        }
+
+        const target = entry ?? history.at(-1);
+        const index = target ? history.indexOf(target) : -1;
+        if (!target || index === -1) {
+            // The toast's button of a change that Ctrl+Z has undone already
+            if (!entry) this.toast('Nothing to undo');
+
+            return false;
+        }
+
+        history.splice(index, 1);
+        const result = await target.undo();
+
+        if (result.ok) {
+            this.toast(target.undone);
+        } else {
+            const reasons = Object.values(result.fields);
+            const reason = result.status === 404
+                ? 'It was deleted in the meantime.'
+                : reasons.length > 0 ? reasons.join('. ') + '.' : result.error;
+            this.toast(`Could not undo: ${target.label}. ${reason}`, 'error');
+        }
+
+        return result.ok;
+    },
+
+    /**
+     * Ctrl/Cmd+Z, except in fields and dialogs, where it belongs to the field
+     */
+    undoKey(e: KeyboardEvent): void {
+        if (e.shiftKey || e.altKey || !this.canUseKeys()) return;
+        e.preventDefault();
+        void this.undo();
     },
 
     // --- Forms and dialogs ----------------------------------------------------------------------------
@@ -301,13 +508,14 @@ const timeline = {
      * otherwise it stays open with the input intact and says what went wrong.
      */
     async submitForm(form: HTMLFormElement, method: string, url: string): Promise<boolean> {
-        if (form.getAttribute('aria-busy') === 'true') return false;
+        if (form.getAttribute('aria-busy') === 'true' || locked || form.hasAttribute('data-readonly')) return false;
 
         const submit = form.querySelector('[type="submit"]') as HTMLButtonElement | null;
         form.setAttribute('aria-busy', 'true');
         if (submit) submit.disabled = true;
         this.showFormError(form, null);
 
+        const before = formSnapshots.get(form);
         const result = await this.send(method, url, new FormData(form));
 
         form.removeAttribute('aria-busy');
@@ -319,6 +527,7 @@ const timeline = {
             return false;
         }
 
+        this.recordForm(form, method, url, before, result);
         (form.closest('dialog') as HTMLDialogElement | null)?.close();
         if (form.hasAttribute('data-reset')) {
             form.reset();
@@ -327,6 +536,23 @@ const timeline = {
         }
 
         return true;
+    },
+
+    /**
+     * Record a saved form: a create is undone by deleting the new id, an edit by saving the fields it opened with
+     */
+    recordForm(form: HTMLFormElement, method: string, url: string, before: FormData | undefined, result: SendResult): void {
+        const data = new FormData(form);
+        const isGroup = url.startsWith('/cmd/groups');
+        const name = String(data.get(isGroup ? 'name' : 'title') ?? '').trim();
+        const what = `${isGroup ? 'group ' : ''}“${name}”`;
+
+        if (method === 'POST') {
+            const id = Number(result.data.id);
+            if (id > 0) this.record(`Added ${what}`, () => this.send('DELETE', `${url}/${id}`));
+        } else if (method === 'PUT' && before) {
+            this.record(`Changed ${what}`, () => this.send('PUT', url, before));
+        }
     },
 
     /**
@@ -389,6 +615,12 @@ const timeline = {
             itemId: active?.closest('.timeline-item')?.id ?? null,
             trackId: active?.closest('.track')?.id ?? null,
         };
+        const form = dialog.querySelector('form');
+        if (locked) {
+            this.makeReadOnly(dialog);
+        } else if (form) {
+            formSnapshots.set(form, new FormData(form));
+        }
         dialog.showModal();
     },
 
@@ -409,7 +641,7 @@ const timeline = {
      */
     confirmDelete(trigger: HTMLElement, url: string, message: string): void {
         const dialog = document.getElementById('confirm-dialog') as HTMLDialogElement | null;
-        if (!dialog) return;
+        if (!dialog || locked) return;
 
         pendingConfirm = { url, parent: trigger.closest('dialog') };
         (dialog.querySelector('.confirm-message') as HTMLElement).textContent = message;
@@ -508,16 +740,29 @@ const timeline = {
      * Save new dates for an item; on failure put the old ones back and say so
      */
     async saveDates(item: HTMLElement, startDate: string, endDate: string, oldStart: string, oldEnd: string): Promise<boolean> {
-        const formData = new FormData();
-        formData.append('startDate', startDate);
-        formData.append('endDate', endDate);
-        formData.append('groupId', item.dataset.groupId ?? '');
+        const url = `/cmd/items/${item.dataset.itemId}/resize`;
+        const dates = (start: string, end: string): FormData => {
+            const formData = new FormData();
+            formData.append('startDate', start);
+            formData.append('endDate', end);
+            formData.append('groupId', item.dataset.groupId ?? '');
+
+            return formData;
+        };
 
         item.classList.add('saving');
-        const result = await this.send('PATCH', `/cmd/items/${item.dataset.itemId}/resize`, formData);
+        const result = await this.send('PATCH', url, dates(startDate, endDate));
         item.classList.remove('saving');
 
-        if (!result.ok) {
+        if (result.ok) {
+            const title = item.querySelector('.item-title')?.textContent ?? 'item';
+            const before = dates(oldStart, oldEnd);
+            this.record(
+                `Changed “${title}”: ${this.formatMonth(startDate)} → ${this.formatMonth(endDate)}`,
+                () => this.send('PATCH', url, before),
+                `Undone: “${title}” is back at ${this.formatMonth(oldStart)} → ${this.formatMonth(oldEnd)}`,
+            );
+        } else {
             this.applyDates(item, oldStart, oldEnd);
             const reasons = Object.values(result.fields);
             this.toast(`The new dates were not saved. ${reasons.length > 0 ? reasons.join('. ') + '.' : result.error}`, 'error');
@@ -533,7 +778,7 @@ const timeline = {
      */
     startResize(e: PointerEvent): boolean {
         const handle = e.target as HTMLElement;
-        if (!handle.classList.contains('resize-handle')) return false;
+        if (!handle.classList.contains('resize-handle') || locked) return false;
 
         e.stopPropagation();
         e.preventDefault();
@@ -704,9 +949,7 @@ const timeline = {
         if (!this.isValidDateOrder(start, end || this.getTodayDate()) || this.toMonths(start) < this.getStartYear() * 12) return;
 
         this.applyDates(item, start, end);
-        if (await this.saveDates(item, start, end, oldStart, oldEnd)) {
-            this.toast(`${item.querySelector('.item-title')?.textContent ?? 'Item'}: ${this.formatMonth(start)} → ${this.formatMonth(end)}`);
-        }
+        await this.saveDates(item, start, end, oldStart, oldEnd);
     },
 
     /**
@@ -791,13 +1034,14 @@ const timeline = {
         e.preventDefault();
 
         if (item && horizontal !== 0 && (e.shiftKey || e.altKey)) {
-            void this.nudgeItem(item, e.altKey ? 'start' : 'end', horizontal);
+            if (!this.blockedByLock()) void this.nudgeItem(item, e.altKey ? 'start' : 'end', horizontal);
 
             return;
         }
 
         if (vertical !== 0) {
             if (button && e.altKey) {
+                if (this.blockedByLock()) return;
                 const groupId = Number(track.dataset.groupId);
                 void this.moveGroup(groupId, vertical as -1 | 1).then(() => {
                     (document.querySelector(`#track-${groupId} .track-info`) as HTMLElement | null)?.focus();
@@ -956,6 +1200,11 @@ const timeline = {
      * Start dragging a group track
      */
     startDragGroup(e: DragEvent, groupId: number): void {
+        if (locked) {
+            e.preventDefault();
+
+            return;
+        }
         if (!e.dataTransfer) return;
 
         e.dataTransfer.setData('text/plain', String(groupId));
@@ -990,7 +1239,7 @@ const timeline = {
      * Mark the edge of the hovered track where the dragged group will land
      */
     dragOverTrack(e: DragEvent): void {
-        if (!e.dataTransfer) return;
+        if (!e.dataTransfer || locked) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
 
@@ -1019,7 +1268,7 @@ const timeline = {
         this.clearDropMarkers();
 
         const draggedId = e.dataTransfer?.getData('text/plain');
-        if (!draggedId || draggedId === String(targetGroupId)) return;
+        if (locked || !draggedId || draggedId === String(targetGroupId)) return;
 
         const ids = this.getGroupOrder();
         const fromIdx = ids.indexOf(draggedId);
@@ -1029,7 +1278,7 @@ const timeline = {
         ids.splice(fromIdx, 1);
         ids.splice(toIdx, 0, draggedId);
 
-        await this.saveGroupOrder(ids);
+        await this.saveGroupOrder(ids, `Moved “${this.groupName(draggedId)}” to position ${toIdx + 1} of ${ids.length}`);
     },
 
     /**
@@ -1039,28 +1288,33 @@ const timeline = {
         const ids = this.getGroupOrder();
         const fromIdx = ids.indexOf(String(groupId));
         const toIdx = fromIdx + delta;
-        if (fromIdx === -1 || toIdx < 0 || toIdx >= ids.length) return;
+        if (locked || fromIdx === -1 || toIdx < 0 || toIdx >= ids.length) return;
 
         [ids[fromIdx], ids[toIdx]] = [ids[toIdx], ids[fromIdx]];
 
-        if (await this.saveGroupOrder(ids)) {
-            const name = document.querySelector(`#track-${groupId} .track-name`)?.textContent ?? 'Group';
-            this.toast(`${name} moved to position ${toIdx + 1} of ${ids.length}`);
-        }
+        await this.saveGroupOrder(ids, `Moved “${this.groupName(String(groupId))}” to position ${toIdx + 1} of ${ids.length}`);
+    },
+
+    groupName(groupId: string): string {
+        return document.querySelector(`#track-${groupId} .track-name`)?.textContent ?? 'group';
     },
 
     getGroupOrder(): string[] {
         return ([...document.querySelectorAll('.track')] as HTMLElement[]).map(t => t.dataset.groupId ?? '');
     },
 
-    async saveGroupOrder(ids: string[]): Promise<boolean> {
-        const result = await this.send(
+    async saveGroupOrder(ids: string[], label: string): Promise<boolean> {
+        const put = (order: string[]): Promise<SendResult> => this.send(
             'PUT',
             '/cmd/groups/reorder',
-            JSON.stringify({ orderedIds: ids.map(Number) }),
+            JSON.stringify({ orderedIds: order.map(Number) }),
             { 'Content-Type': 'application/json' },
         );
-        if (!result.ok) {
+        const before = this.getGroupOrder();
+        const result = await put(ids);
+        if (result.ok) {
+            this.record(label, () => put(before));
+        } else {
             this.toast(`The new order was not saved. ${result.error}`, 'error');
         }
 
@@ -1069,6 +1323,7 @@ const timeline = {
 };
 
 window.timeline = timeline;
+timeline.setLocked(timeline.storedLock(), false);
 
 // Open on today instead of the empty first year; the scroll event carries the position into the signal
 const initialWrapper = document.querySelector('.timeline-wrapper');

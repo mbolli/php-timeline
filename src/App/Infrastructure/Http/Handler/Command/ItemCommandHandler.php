@@ -35,10 +35,10 @@ final class ItemCommandHandler {
         }
 
         $command = CreateItemCommand::fromArray($data);
-        ($this->createHandler)($command);
+        $item = ($this->createHandler)($command);
 
-        // Return 204 No Content - the SSE will push the update
-        return new EmptyResponse(204);
+        // The SSE pushes the new item; the id lets the client undo the create
+        return new JsonResponse(['id' => $item->id], 201);
     }
 
     public function update(ServerRequestInterface $request): ResponseInterface {

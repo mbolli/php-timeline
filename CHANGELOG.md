@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- An edit lock (`L` or the Lock button in the app bar): while it is on, items and groups open read-only and nothing can be resized, dragged, added or saved. Touch screens start locked; the choice is stored in the browser
+- Undo for resizes, edits, reorders and new items and groups, from the toast after each change or with Ctrl/Cmd+Z, several steps back; other tabs see the undo like any change
+- Creating an item or a group answers 201 with the new id
 - Search for an item by title or jump to a year (`/`), and shortcuts for today (`T`), fit (`F`), new item (`N`) and new group (`G`)
 - Keyboard access: one tab stop per group, arrow keys through its items, Shift or Alt with an arrow to move an item's end or start, Alt with up or down to move a group
 - Resize handles work with a finger; groups can be moved with buttons in their dialog

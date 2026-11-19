@@ -33,9 +33,9 @@ final class GroupCommandHandler {
         }
 
         $command = CreateGroupCommand::fromArray($data);
-        ($this->createHandler)($command);
+        $group = ($this->createHandler)($command);
 
-        return new EmptyResponse(204);
+        return new JsonResponse(['id' => $group->id], 201);
     }
 
     public function update(ServerRequestInterface $request): ResponseInterface {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createGroupWithItem, grabHandle, item, openApp, swipe, zoomPercent } from './support/app';
+import { createGroupWithItem, grabHandle, item, openApp, swipe, unlock, zoomPercent } from './support/app';
 
 test.describe('resizing items', () => {
     test('dragging the end handle changes the end date, with a tooltip on the way', async ({ page }) => {
@@ -128,7 +128,7 @@ test.describe('resizing items', () => {
         await bar.focus();
         await page.keyboard.press('Shift+ArrowRight');
         await expect(bar).toHaveAttribute('data-end-date', `${year}-07`);
-        await expect(page.locator('.toast')).toHaveText(`${title}: Jan ${year} → Jul ${year}`);
+        await expect(page.locator('.toast-message')).toHaveText(`Changed “${title}”: Jan ${year} → Jul ${year}`);
         await page.keyboard.press('Shift+ArrowLeft');
         await page.keyboard.press('Shift+ArrowLeft');
         await expect(bar).toHaveAttribute('data-end-date', `${year}-05`);
@@ -147,6 +147,7 @@ test.describe('resizing on a touch screen', () => {
 
     test('the handles are visible and follow a finger', async ({ page }) => {
         await openApp(page);
+        await unlock(page);
         const { title, year } = await createGroupWithItem(page);
         const bar = item(page, title);
 

@@ -88,7 +88,7 @@ it('rejects a group with an injected color or a blank name', function (): void {
 
     expect($create(['name' => 'Cars', 'color' => '#00ff00;x:y']))->toBe(422)
         ->and($create(['name' => '  ', 'color' => '#00ff00']))->toBe(422)
-        ->and($create(['name' => 'Cars', 'color' => '#00ff00']))->toBe(204)
+        ->and($create(['name' => 'Cars', 'color' => '#00ff00']))->toBe(201)
     ;
 });
 

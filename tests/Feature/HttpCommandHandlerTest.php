@@ -73,9 +73,10 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->groupCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(204);
+                expect($response->getStatusCode())->toBe(201);
 
                 $groups = $this->repository->getAllGroups();
+                expect(json_decode((string) $response->getBody(), true))->toBe(['id' => $groups[1]->id]);
                 expect($groups)->toHaveCount(2);
                 expect($groups[1]->name)->toBe('Mobile Phones');
                 expect($groups[1]->icon)->toBe('📱');
@@ -97,7 +98,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->groupCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(204);
+                expect($response->getStatusCode())->toBe(201);
 
                 $groups = $this->repository->getAllGroups();
                 expect($groups[1]->name)->toBe('Gaming Consoles');
@@ -227,9 +228,10 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(204);
+                expect($response->getStatusCode())->toBe(201);
 
                 $items = $this->repository->getAllItems();
+                expect(json_decode((string) $response->getBody(), true))->toBe(['id' => $items[0]->id]);
                 expect($items)->toHaveCount(1);
                 expect($items[0]->title)->toBe('iPhone 15 Pro');
                 expect($items[0]->groupId)->toBe($this->group->id);
@@ -252,7 +254,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(204);
+                expect($response->getStatusCode())->toBe(201);
 
                 $items = $this->repository->getAllItems();
                 expect($items[0]->title)->toBe('MacBook Pro');
@@ -271,7 +273,7 @@ describe('HTTP Command Handlers', function (): void {
 
                 $response = $this->itemCommandHandler->create($request);
 
-                expect($response->getStatusCode())->toBe(204);
+                expect($response->getStatusCode())->toBe(201);
 
                 $items = $this->repository->getAllItems();
                 expect($items[0]->isOngoing())->toBeTrue();

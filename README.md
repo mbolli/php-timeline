@@ -19,6 +19,7 @@ This project can serve as a **template for building high-performance PHP applica
 - **Vertical Grouping** — Track-based layout like Adobe Premiere for categorizing events
 - **Resize Handles** — Drag item edges to adjust start/end dates
 - **Drag & Drop Reordering** — Reorder groups via drag handle
+- **Edit Lock and Undo**: lock the timeline against accidental changes, undo the last changes
 - **Real-time Multiplayer** — SSE-based updates via Event Bus pattern
 - **Declarative Frontend** — [Datastar](https://data-star.dev/) for reactive UI with minimal JavaScript
 - **CQRS Architecture** — Separated command and query handlers
@@ -301,6 +302,8 @@ The seeder includes example data for:
 | `T`, `F` | Go to today, fit the whole timeline |
 | `/` | Find an item by title or jump to a year |
 | `N`, `G` | New item, new group |
+| `L` or the Lock button | Lock or unlock editing |
+| Ctrl/Cmd + `Z` | Undo the last change made in this tab, several steps back |
 | Drag item edge handles (mouse or finger) | Resize item start/end date |
 | Drag group handle (⠿) | Reorder groups |
 | Click item | Edit item |
@@ -309,6 +312,15 @@ The seeder includes example data for:
 Tab stops once per group. From a group's label, `←` / `→` walk its items and `↑` / `↓` the groups,
 `Enter` edits, `Shift` + `←` / `→` moves an item's end, `Alt` + `←` / `→` its start, and
 `Alt` + `↑` / `↓` moves the group.
+
+While editing is locked, the timeline can be viewed but not changed: no resize handles, no group
+dragging, no New item or Add group, and a click opens an item or group read-only. Touch screens start
+locked, other screens unlocked; the browser remembers the choice. The lock only guards against slips
+in this browser, the server does not enforce it.
+
+Each change shows a toast with an Undo button for a few seconds. Undo sends the opposite command,
+so every open tab sees it; it works while locked, and a reload clears the history. Deletes are not
+undoable and keep their confirmation.
 
 ## License
 

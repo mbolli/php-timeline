@@ -49,8 +49,11 @@ $colorField = static function (string $colorId, string $colorValue, ?bool $color
          data-on-keys:meta-0="<?php echo $goHome; ?>"
          data-on-keys:t__noprevent="timeline.canUseKeys() && (<?php echo $goToday; ?>)"
          data-on-keys:f__noprevent="timeline.canUseKeys() && (($_zoom = timeline.fit().zoom), ($_panX = timeline.fit().panX))"
-         data-on-keys:n__noprevent="timeline.canUseKeys() && (evt.preventDefault(), $_showAddItem = true)"
-         data-on-keys:g__noprevent="timeline.canUseKeys() && (evt.preventDefault(), $_showAddGroup = true)"
+         data-on-keys:n__noprevent="timeline.canUseKeys() && !timeline.blockedByLock() && (evt.preventDefault(), $_showAddItem = true)"
+         data-on-keys:g__noprevent="timeline.canUseKeys() && !timeline.blockedByLock() && (evt.preventDefault(), $_showAddGroup = true)"
+         data-on-keys:l__noprevent="timeline.lockKey(evt)"
+         data-on-keys:ctrl-z__noprevent="timeline.undoKey(evt)"
+         data-on-keys:meta-z__noprevent="timeline.undoKey(evt)"
          data-on:pointermove__window="if($_isDragging) { $_panX = timeline.clampPan($_panX + timeline.getDragDelta(evt, $_lastMouseX)); $_lastMouseX = evt.clientX } else if($_isResizing) { timeline.handleResizeMove(evt) }"
          data-on:pointerup__window="$_isDragging = false; if($_isResizing) { timeline.finishResize(); $_isResizing = false }"
          data-on:pointercancel__window="$_isDragging = false; if($_isResizing) { timeline.cancelResize(); $_isResizing = false }"
@@ -87,8 +90,14 @@ $colorField = static function (string $colorId, string $colorValue, ?bool $color
             </div>
 
             <div class="appbar-actions">
-                <button type="button" class="btn btn-primary" title="New item (N)" data-on:click="$_showAddItem = true">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> New item
+                <button type="button" id="lock-toggle" class="btn btn-lock" aria-pressed="false" title="Lock editing (L)"
+                        data-on:click="timeline.toggleLock()">
+                    <svg class="lock-closed" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>
+                    <svg class="lock-open" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.6-1.75"/></svg>
+                    <span class="btn-label">Lock</span>
+                </button>
+                <button type="button" class="btn btn-primary btn-new edit-only" title="New item (N)" data-on:click="timeline.isLocked() || ($_showAddItem = true)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> <span class="btn-label">New item</span>
                 </button>
                 <button type="button" class="icon-btn" aria-label="About" title="About and shortcuts" aria-haspopup="dialog"
                         data-on:click="$_showAbout = true">

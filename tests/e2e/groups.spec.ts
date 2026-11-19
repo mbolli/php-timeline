@@ -75,7 +75,7 @@ test.describe('groups', () => {
 
         // Another client adds a group
         const response = await page.request.post('/cmd/groups', { form: { name: later, icon: '🧪', color: '#3498db' } });
-        expect(response.status()).toBe(204);
+        expect(response.status()).toBe(201);
 
         await expect(select.locator('option', { hasText: later })).toHaveCount(1);
         await expect(select).toHaveValue(value);
@@ -137,7 +137,7 @@ test.describe('groups', () => {
         const dialog = page.getByRole('dialog', { name: 'Edit group' });
         await dialog.getByRole('button', { name: 'Move up' }).click();
         await expect.poll(tail).toEqual([b, a]);
-        await expect(page.locator('.toast')).toContainText(`${b} moved to position`);
+        await expect(page.locator('.toast')).toContainText(`Moved “${b}” to position`);
         await dialog.getByRole('button', { name: 'Move down' }).click();
         await expect.poll(tail).toEqual([a, b]);
         await dialog.getByRole('button', { name: 'Cancel' }).click();

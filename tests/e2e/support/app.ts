@@ -17,7 +17,14 @@ export async function openApp(page: Page): Promise<void> {
     await page.waitForFunction(() => 'timeline' in window);
 }
 
-export const wrapper = (page: Page): Locator => page.locator('.timeline-wrapper');
+/** Touch screens start locked; tests that edit there unlock first, as a user would */
+export async function unlock(page: Page): Promise<void> {
+    const button = page.getByRole('button', { name: 'Lock', exact: true });
+    if ((await button.getAttribute('aria-pressed')) === 'true') await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+}
+
+export const wrapper =(page: Page): Locator => page.locator('.timeline-wrapper');
 
 export async function zoomPercent(page: Page): Promise<number> {
     return parseInt((await page.locator('.zoom-level').textContent()) ?? '', 10);
