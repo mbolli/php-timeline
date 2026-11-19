@@ -9,7 +9,8 @@ use App\Domain\Model\TimelineGroup;
 use App\Domain\Model\TimelineItem;
 use App\Infrastructure\Persistence\SqliteTimelineRepository;
 
-$dbPath = __DIR__ . '/../data/timeline.db';
+// An optional first argument seeds another file, which the e2e tests use for their own database
+$dbPath = $argv[1] ?? __DIR__ . '/../data/timeline.db';
 $schemaPath = __DIR__ . '/../data/schema.sql';
 
 // Remove existing database
