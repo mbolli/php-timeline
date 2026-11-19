@@ -269,11 +269,20 @@ The seeder includes example data for:
 | Control | Action |
 |---------|--------|
 | Ctrl/Cmd + Mouse wheel | Zoom in/out (centered on cursor) |
-| Click + drag (on timeline) | Pan the timeline |
-| Drag item edge handles | Resize item start/end date |
+| Ctrl/Cmd + `+` / `-` / `0` | Zoom in, zoom out, reset the view |
+| Click + drag (on timeline), scroll, swipe | Pan the timeline |
+| `←` / `→` | Pan |
+| `T`, `F` | Go to today, fit the whole timeline |
+| `/` | Find an item by title or jump to a year |
+| `N`, `G` | New item, new group |
+| Drag item edge handles (mouse or finger) | Resize item start/end date |
 | Drag group handle (⠿) | Reorder groups |
 | Click item | Edit item |
-| Click group label | Edit group |
+| Click group label | Edit group, move it up or down |
+
+Tab stops once per group. From a group's label, `←` / `→` walk its items and `↑` / `↓` the groups,
+`Enter` edits, `Shift` + `←` / `→` moves an item's end, `Alt` + `←` / `→` its start, and
+`Alt` + `↑` / `↓` moves the group.
 
 ## License
 

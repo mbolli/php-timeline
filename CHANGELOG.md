@@ -14,11 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Composer no longer needs `minimum-stability: RC`, since datastar-php is stable
 - `composer serve` no longer stops after Composer's 300 second process timeout
 - The README lists pnpm instead of npm and the current versions
+- Redesigned interface: neutral chrome in light and dark, tinted item bars with readable text, a two-row ruler with month names that adapts to the zoom, a floating dock for zoom, Fit and Today, and dialogs that open as a sheet on phones
+- The timeline opens on today and Reset view returns there; the today marker sits in the ruler
+- Item titles stay inside the visible part of their bar, and a year that is wider than the screen keeps its label
+- Items that follow each other in the same month share a lane
+- Dialogs stay open until the server has saved, and show its reason or a connection failure with the input intact
+- Deletes are confirmed in the page's own dialog instead of the browser's `confirm()`
+- New items take their group's color unless one is chosen
+- On a phone the label column shrinks to the icons and each track carries its group's name
+
+### Added
+
+- Search for an item by title or jump to a year (`/`), and shortcuts for today (`T`), fit (`F`), new item (`N`) and new group (`G`)
+- Keyboard access: one tab stop per group, arrow keys through its items, Shift or Alt with an arrow to move an item's end or start, Alt with up or down to move a group
+- Resize handles work with a finger; groups can be moved with buttons in their dialog
+- Playwright end-to-end tests (`pnpm test:e2e`) with their own server and database
+- `TIMELINE_PORT`, `TIMELINE_DB` and `TIMELINE_PID_FILE` override the configuration; `bin/seed.php` takes a database path
 
 ### Fixed
 
 - The server starts on OpenSwoole, which has no `swoole_set_process_name()`
-- Ctrl+Minus zooms out: on-keys 2.0 maps `minus` to the `-` key, which 1.2 did not
+- Ctrl/Cmd with `+` and `-` zoom; the key names used before never matched
+- A resize or reorder that the server did not save puts the bar or the order back and says so
+- A live update no longer changes the group selected in an open New item dialog; if that group was deleted elsewhere, the dialog says so
+- New groups go to the end of the list, and editing a group no longer moves it to the top
+- Focus returns to the item or group after its dialog closes
+- Datastar is requested once instead of through two script entries
 
 ## [0.3.1] - 2026-10-05
 
