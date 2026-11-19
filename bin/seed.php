@@ -9,11 +9,19 @@ use App\Domain\Model\TimelineGroup;
 use App\Domain\Model\TimelineItem;
 use App\Infrastructure\Persistence\SqliteTimelineRepository;
 
-// An optional first argument seeds another file, which the e2e tests use for their own database
-$dbPath = $argv[1] ?? __DIR__ . '/../data/timeline.db';
+// An optional path seeds another file, which the e2e tests use for their own database
+$args = array_slice($argv, 1);
+$force = in_array('--force', $args, true);
+$paths = array_values(array_filter($args, static fn (string $arg): bool => $arg !== '--force'));
+$dbPath = $paths[0] ?? __DIR__ . '/../data/timeline.db';
 $schemaPath = __DIR__ . '/../data/schema.sql';
 
-// Remove existing database
+if (file_exists($dbPath) && !$force) {
+    fwrite(STDERR, "{$dbPath} already exists. Run with --force to replace it with the sample data.\n");
+
+    exit(1);
+}
+
 if (file_exists($dbPath)) {
     unlink($dbPath);
     echo "🗑️  Removed existing database\n";

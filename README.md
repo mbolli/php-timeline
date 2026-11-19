@@ -101,7 +101,8 @@ composer cs         # Check code style (dry-run)
 composer cs:fix     # Fix code style
 
 # Database
-composer db:seed    # Seed database with sample data
+composer db:seed    # Seed database with sample data; refuses to overwrite an existing one
+composer db:seed -- --force   # Replace an existing database with the sample data
 
 # Frontend
 pnpm build          # Build TypeScript (minified)

@@ -27,7 +27,7 @@ export default defineConfig({
     },
     webServer: {
         // Started directly instead of through `composer serve`, which Composer stops after 300 seconds
-        command: `php bin/seed.php "${e2eDir}/timeline.db" && exec php vendor/bin/laminas mezzio:swoole:start`,
+        command: `php bin/seed.php --force "${e2eDir}/timeline.db" && exec php vendor/bin/laminas mezzio:swoole:start`,
         url: `http://127.0.0.1:${e2ePort}/`,
         reuseExistingServer: false,
         timeout: 30_000,
