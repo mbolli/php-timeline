@@ -2,7 +2,9 @@
 /node_modules
 /.env
 /*.cache
+/config/autoload/local.php
 /config/autoload/*.local.php
 /data/timeline.db
-/data/swoole.pid/test-results
+/data/swoole.pid
+/test-results
 /playwright-report
