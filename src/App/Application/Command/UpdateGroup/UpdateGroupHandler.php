@@ -26,7 +26,7 @@ final class UpdateGroupHandler {
             name: $command->name,
             icon: $command->icon,
             color: $command->color,
-            sortOrder: $command->sortOrder,
+            sortOrder: $command->sortOrder ?? $existing->sortOrder,
         );
 
         $savedGroup = $this->repository->saveGroup($group);

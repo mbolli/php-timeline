@@ -21,7 +21,7 @@ final class CreateGroupHandler {
             name: $command->name,
             icon: $command->icon,
             color: $command->color,
-            sortOrder: $command->sortOrder,
+            sortOrder: $command->sortOrder ?? $this->nextSortOrder(),
         );
 
         $savedGroup = $this->repository->saveGroup($group);
@@ -32,5 +32,14 @@ final class CreateGroupHandler {
         ));
 
         return $savedGroup;
+    }
+
+    /**
+     * A new group goes below the existing ones.
+     */
+    private function nextSortOrder(): int {
+        $orders = array_map(static fn (TimelineGroup $group): int => $group->sortOrder, $this->repository->getAllGroups());
+
+        return $orders === [] ? 0 : max($orders) + 1;
     }
 }

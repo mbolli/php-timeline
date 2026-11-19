@@ -56,6 +56,28 @@ describe('Command Handlers', function (): void {
         });
     });
 
+    describe('group order', function (): void {
+        it('puts a new group below the existing ones', function (): void {
+            $handler = new CreateGroupHandler($this->repository, $this->eventBus);
+
+            $first = $handler(new CreateGroupCommand(name: 'First'));
+            $second = $handler(new CreateGroupCommand(name: 'Second'));
+
+            expect($first->sortOrder)->toBeGreaterThan($this->group->sortOrder);
+            expect($second->sortOrder)->toBeGreaterThan($first->sortOrder);
+        });
+
+        it('keeps the place of a group that is edited', function (): void {
+            $created = (new CreateGroupHandler($this->repository, $this->eventBus))(new CreateGroupCommand(name: 'Last'));
+
+            $updated = (new UpdateGroupHandler($this->repository, $this->eventBus))(
+                new UpdateGroupCommand(id: $created->id, name: 'Renamed'),
+            );
+
+            expect($updated->sortOrder)->toBe($created->sortOrder);
+        });
+    });
+
     describe('UpdateGroupHandler', function (): void {
         it('updates a group and emits event', function (): void {
             $handler = new UpdateGroupHandler($this->repository, $this->eventBus);

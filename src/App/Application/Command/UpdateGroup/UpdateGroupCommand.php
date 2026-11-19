@@ -10,7 +10,7 @@ final class UpdateGroupCommand {
         public readonly string $name,
         public readonly string $icon = '📁',
         public readonly string $color = '#3498db',
-        public readonly int $sortOrder = 0,
+        public readonly ?int $sortOrder = null,
     ) {}
 
     /**
@@ -22,7 +22,7 @@ final class UpdateGroupCommand {
             name: $data['name'],
             icon: $data['icon'] ?? '📁',
             color: $data['color'] ?? '#3498db',
-            sortOrder: (int) ($data['sortOrder'] ?? 0),
+            sortOrder: isset($data['sortOrder']) ? (int) $data['sortOrder'] : null,
         );
     }
 }
