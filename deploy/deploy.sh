@@ -53,7 +53,8 @@ as_app "${php_env[@]}" php8.5 /usr/bin/composer install --no-dev --no-interactio
 
 systemctl start timeline
 for _ in $(seq 1 20); do
-    if curl -fs --max-time 2 "http://127.0.0.1:$port/" | grep -q 'Life Timeline'; then
+    page=$(curl -fs --max-time 2 "http://127.0.0.1:$port/" || true)
+    if [[ $page == *'Life Timeline'* ]]; then
         echo "Live: $(as_app git log -1 --format='%h %s')"
         exit 0
     fi
