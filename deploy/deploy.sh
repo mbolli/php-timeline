@@ -17,7 +17,7 @@ as_app() { sudo -n -u timeline env HOME=/tmp COMPOSER_HOME=/tmp/timeline-compose
 
 cd "$dir"
 
-dirty=$(as_app git status --porcelain | grep -v " $db\$" || true)
+dirty=$(as_app git status --porcelain | grep -v -e " $db\$" -e " data/backups/\$" || true)
 if [ -n "$dirty" ]; then
     echo "Stopped: $dir has changes that are not in git:" >&2
     echo "$dirty" >&2
