@@ -303,6 +303,7 @@ The seeder includes example data for:
 | `/` | Find an item by title or jump to a year |
 | `N`, `G` | New item, new group |
 | `L` or the Lock button | Lock or unlock editing |
+| `D` or the Details button | Show or hide the descriptions inside the items |
 | Ctrl/Cmd + `Z` | Undo the last change made in this tab, several steps back |
 | Drag item edge handles (mouse or finger) | Resize item start/end date |
 | Drag group handle (⠿) | Reorder groups |

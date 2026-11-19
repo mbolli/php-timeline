@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A Details toggle (`D` or the Details button in the app bar) that shows each item's description as a second line inside its bar; the choice is stored in the browser
 - An edit lock (`L` or the Lock button in the app bar): while it is on, items and groups open read-only and nothing can be resized, dragged, added or saved. Touch screens start locked; the choice is stored in the browser
 - Undo for resizes, edits, reorders and new items and groups, from the toast after each change or with Ctrl/Cmd+Z, several steps back; other tabs see the undo like any change
 - Creating an item or a group answers 201 with the new id

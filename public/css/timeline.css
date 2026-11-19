@@ -1660,7 +1660,7 @@
 
 @layer components {
     /* Edit lock: the toggle in the app bar, and the controls that leave or go quiet while it is on */
-    .btn-lock {
+    .btn-toggle {
         padding-inline: 0.625rem 0.75rem;
         border-color: transparent;
         background: none;
@@ -1695,7 +1695,7 @@
 
     /* On a phone the app bar buttons keep their icons; the labels stay for screen readers */
     @container app (width < 44rem) {
-        .btn-lock,
+        .btn-toggle,
         .btn-new {
             width: 2.25rem;
             padding: 0;
@@ -1713,7 +1713,7 @@
 
     @media (pointer: coarse) {
         @container app (width < 44rem) {
-            .btn-lock,
+            .btn-toggle,
             .btn-new {
                 width: 2.75rem;
             }
@@ -1835,6 +1835,43 @@
         .toast-action {
             min-height: 2.25rem;
             padding-inline: 0.875rem;
+        }
+    }
+}
+
+@layer components {
+    /* Descriptions inside the items: off by default, the D key or the Details button shows them */
+    .item-description {
+        display: none;
+    }
+
+    .show-descriptions {
+        --lane-height: 44px;
+
+        /* A grid as wide as its longest line, so the text block still sticks while the bar scrolls */
+        & .item-body {
+            display: grid;
+            grid-template-columns: auto auto;
+            justify-content: start;
+            align-items: baseline;
+            column-gap: 0.5rem;
+            row-gap: 0.125rem;
+        }
+
+        & .item-description {
+            display: block;
+            grid-column: 1 / -1;
+            max-width: 32rem;
+            overflow: hidden;
+            font-size: 0.6875rem;
+            opacity: 0.8;
+            text-overflow: ellipsis;
+        }
+    }
+
+    @media (pointer: coarse) {
+        .show-descriptions {
+            --lane-height: 50px;
         }
     }
 }

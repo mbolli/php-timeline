@@ -52,6 +52,7 @@ $colorField = static function (string $colorId, string $colorValue, ?bool $color
          data-on-keys:n__noprevent="timeline.canUseKeys() && !timeline.blockedByLock() && (evt.preventDefault(), $_showAddItem = true)"
          data-on-keys:g__noprevent="timeline.canUseKeys() && !timeline.blockedByLock() && (evt.preventDefault(), $_showAddGroup = true)"
          data-on-keys:l__noprevent="timeline.lockKey(evt)"
+         data-on-keys:d__noprevent="timeline.descriptionsKey(evt)"
          data-on-keys:ctrl-z__noprevent="timeline.undoKey(evt)"
          data-on-keys:meta-z__noprevent="timeline.undoKey(evt)"
          data-on:pointermove__window="if($_isDragging) { $_panX = timeline.clampPan($_panX + timeline.getDragDelta(evt, $_lastMouseX)); $_lastMouseX = evt.clientX } else if($_isResizing) { timeline.handleResizeMove(evt) }"
@@ -90,7 +91,12 @@ $colorField = static function (string $colorId, string $colorValue, ?bool $color
             </div>
 
             <div class="appbar-actions">
-                <button type="button" id="lock-toggle" class="btn btn-lock" aria-pressed="false" title="Lock editing (L)"
+                <button type="button" id="descriptions-toggle" class="btn btn-toggle" aria-pressed="false" title="Show descriptions (D)"
+                        data-on:click="timeline.toggleDescriptions()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+                    <span class="btn-label">Details</span>
+                </button>
+                <button type="button" id="lock-toggle" class="btn btn-toggle" aria-pressed="false" title="Lock editing (L)"
                         data-on:click="timeline.toggleLock()">
                     <svg class="lock-closed" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>
                     <svg class="lock-open" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 7.6-1.75"/></svg>

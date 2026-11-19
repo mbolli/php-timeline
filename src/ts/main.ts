@@ -53,6 +53,7 @@ interface PendingConfirm {
 
 const MONTH_WIDTH = 20;
 const LOCK_KEY = 'timeline.locked';
+const DESCRIPTIONS_KEY = 'timeline.descriptions';
 const HISTORY_LIMIT = 50;
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -384,6 +385,42 @@ const timeline = {
 
     toggleLock(): void {
         this.setLocked(!locked);
+    },
+
+    // --- Descriptions inside the items ---------------------------------------------------------------
+
+    storedDescriptions(): boolean {
+        try {
+            return localStorage.getItem(DESCRIPTIONS_KEY) === '1';
+        } catch {
+            return false;
+        }
+    },
+
+    setDescriptions(value: boolean, remember = true): void {
+        document.documentElement.classList.toggle('show-descriptions', value);
+        const button = document.getElementById('descriptions-toggle');
+        button?.setAttribute('aria-pressed', String(value));
+        button?.setAttribute('title', value ? 'Hide descriptions (D)' : 'Show descriptions (D)');
+        if (!remember) return;
+        try {
+            localStorage.setItem(DESCRIPTIONS_KEY, value ? '1' : '0');
+        } catch {
+            // Not remembered; the setting still holds for this page
+        }
+    },
+
+    toggleDescriptions(): void {
+        this.setDescriptions(!document.documentElement.classList.contains('show-descriptions'));
+    },
+
+    /**
+     * The D key, without modifiers, outside fields and dialogs
+     */
+    descriptionsKey(e: KeyboardEvent): void {
+        if (e.ctrlKey || e.metaKey || e.altKey || !this.canUseKeys()) return;
+        e.preventDefault();
+        this.toggleDescriptions();
     },
 
     /**
@@ -1324,6 +1361,7 @@ const timeline = {
 
 window.timeline = timeline;
 timeline.setLocked(timeline.storedLock(), false);
+timeline.setDescriptions(timeline.storedDescriptions(), false);
 
 // Open on today instead of the empty first year; the scroll event carries the position into the signal
 const initialWrapper = document.querySelector('.timeline-wrapper');

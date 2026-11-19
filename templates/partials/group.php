@@ -104,11 +104,14 @@ $formatMonth = static fn (string $date): string => $monthNames[(int) mb_substr($
                  aria-label="<?php echo htmlspecialchars($item->title) . ', ' . $groupName . ', ' . $spoken; ?>"
                  data-on:click="!timeline.wasResizing() && @get('/query/items/<?php echo $item->id; ?>')"
                  data-on:keydown="(evt.key === 'Enter' || evt.key === ' ') && (evt.preventDefault(), @get('/query/items/<?php echo $item->id; ?>'))"
-                 title="<?php echo htmlspecialchars($item->title); ?>&#10;<?php echo $item->startDate; ?> → <?php echo $item->endDate ?? 'ongoing'; ?>">
+                 title="<?php echo htmlspecialchars($item->title); ?>&#10;<?php echo $item->startDate; ?> → <?php echo $item->endDate ?? 'ongoing'; ?><?php echo $item->description ? '&#10;' . htmlspecialchars($item->description) : ''; ?>">
                 <div class="resize-handle resize-handle-start" data-handle="start" data-on:click__prevent__stop="evt.stopPropagation()"></div>
                 <span class="item-body">
                     <span class="item-title"><?php echo htmlspecialchars($item->title); ?></span>
                     <span class="item-dates"><?php echo $range; ?></span>
+                    <?php if ($item->description) { ?>
+                    <span class="item-description"><?php echo htmlspecialchars($item->description); ?></span>
+                    <?php } ?>
                 </span>
                 <?php if ($item->isOngoing()) { ?>
                 <span class="ongoing-indicator" aria-hidden="true">→</span>
